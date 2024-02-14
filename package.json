@@ -1,0 +1,21 @@
+{
+  "name": "taggedjs-common",
+  "version": "0.0.5",
+  "description": "advanced technologies for tagged template reactive html",
+  "main": "js/index.js",
+  "type": "module",
+  "keywords": [
+    "react",
+    "angular",
+    "vue",
+    "svelte",
+    "alternative",
+    "works",
+    "native",
+    "in",
+    "web",
+    "browser"
+  ],
+  "author": "Acker Dawn Apple",
+  "license": "MIT"
+}
