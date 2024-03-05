@@ -1,0 +1,46 @@
+{
+  "name": "taggedjs-gateway",
+  "private": true,
+  "version": "0.1.0",
+  "description": "advanced technologies for tagged template reactive html",
+  "main": "js/index.js",
+  "type": "module",
+  "scripts": {
+    "build:js": "tsc -p tsconfig.json",
+    "build": "npm run build:js && npx webpack && npm run build:gh-pages && echo \"✅ Build completed\"",
+    "build:gh-pages": "cp -R js/. ../gh-pages/node_modules/taggedjs-gateway/js && cd ../gh-pages && npm run build && echo \"🌉 Built gh-pages\"",
+    "build:watch:gh-pages": "chokidar 'ts/**/*' -c 'npm run build:js && npm run build:dist:only && npm run build:gh-pages'",
+    "build:dist": "npm run build && cp README.MD dist/README.md && npm run build:dist:pack && rm -rf dist/js && cp -R js dist/js && cp -R dist/. ../dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "save:dist": "npm run patch:version && npm run build:dist && cd ../dist && git add . && git commit -m \"dist patch\" && git push",
+    "save": "git add . && git commit -m \"patch\" && git push",
+    "build:dist:pack": "cp package.json dist/package.json && node scripts/package-dist.cjs",
+    "patch:version": "npm --no-git-tag-version version patch",
+    "publish": "npm run build:dist && npm run save:dist && cd ../dist && npm publish",
+    "build:watch": "chokidar 'ts/**/*' -c 'npm run build'"
+  },
+  "keywords": [
+    "react",
+    "angular",
+    "vue",
+    "svelte",
+    "alternative",
+    "works",
+    "native",
+    "in",
+    "web",
+    "browser"
+  ],
+  "author": "Acker Dawn Apple",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6",
+    "chokidar-cli": "^3.0.0",
+    "nodemon": "^3.0.2",
+    "taggedjs": "github:ackerapple/taggedjs",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
