@@ -1,4 +1,4 @@
-import { TagComponent, TagComponentBase } from "../index.js"
+import { TagComponent, TagComponentBase } from "taggedjs"
 import { checkElement, getTagId } from "./tagGateway.utils.js"
 
 const namedTimeouts: Record<string, any> = {}

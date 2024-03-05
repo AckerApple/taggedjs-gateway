@@ -1,4 +1,4 @@
-import { Tag, TagChildrenInput, TagComponent } from "../index.js"
+import { Tag, TagChildrenInput, TagComponent } from "taggedjs"
 import { initWebComponents } from "./gateway.web.component.js"
 import { gatewayTagIds, getTagId } from "./tagGateway.utils.js"
 

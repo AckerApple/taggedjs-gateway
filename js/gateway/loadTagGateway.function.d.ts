@@ -1,2 +1,2 @@
-import { Tag, TagChildrenInput, TagComponent } from "../index.js";
+import { Tag, TagChildrenInput, TagComponent } from "taggedjs";
 export declare function loadTagGateway(component: TagComponent | ((props?: any, children?: TagChildrenInput) => Tag)): string;
