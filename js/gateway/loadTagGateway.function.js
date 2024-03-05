@@ -1,5 +1,5 @@
 import { initWebComponents } from "./gateway.web.component.js";
-import { gatewayTagIds, getTagId } from "./tagGateway.function.js";
+import { gatewayTagIds, getTagId } from "./tagGateway.utils.js";
 let hasInitWebComponents = false;
 export function loadTagGateway(component) {
     if (!hasInitWebComponents) {

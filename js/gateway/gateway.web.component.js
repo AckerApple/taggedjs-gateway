@@ -1,4 +1,4 @@
-import { checkByElement, destroyGateway } from "./tagGateway.function.js";
+import { checkByElement, destroyGateway } from "./tagGateway.utils.js";
 /** <tag-element id="" props="json-string" />
  * For Angular @NgModule({schemas: [CUSTOM_ELEMENTS_SCHEMA]}) is required
  */
