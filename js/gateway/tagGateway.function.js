@@ -5,7 +5,7 @@ export const tagGateway = function tagGateway(component) {
     if (namedTimeouts[id]) {
         return namedTimeouts[id];
     }
-    let intervalId;
+    let intervalId; // NodeJS.Timeout
     let hitCount = 0;
     const interval = 5;
     function findElements() {

@@ -1,4 +1,4 @@
-import { redrawTag, tagElement } from "taggedjs";
+import { tagElement } from "taggedjs";
 import { loadTagGateway } from "./loadTagGateway.function.js";
 const gateways = {};
 export const gatewayTagIds = {};
@@ -67,17 +67,14 @@ function watchElement(id, targetNode, tag, component) {
     });
     function updateTag() {
         const templater = tag.tagSupport.templater;
-        const oldProps = templater.tagSupport.props;
+        const oldProps = templater.tagSupport.propsConfig.latest;
         const newProps = parsePropsString(targetNode);
-        templater.tagSupport.props = newProps;
+        templater.tagSupport.propsConfig.latest = newProps;
         const isSameProps = JSON.stringify(oldProps) === JSON.stringify(newProps);
         if (isSameProps) {
             return; // no reason to update, same props
         }
-        templater.tagSupport.latestProps = newProps;
-        const result = redrawTag(lastTag, templater);
-        // update records
-        gateway.tag = lastTag = result.retag;
+        templater.tagSupport.propsConfig.latest = newProps;
     }
     loadTagGateway(component);
     const gateway = {
