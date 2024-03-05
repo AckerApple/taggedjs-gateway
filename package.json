@@ -33,6 +33,9 @@
   ],
   "author": "Acker Dawn Apple",
   "license": "MIT",
+  "peerDependencies": {
+    "taggedjs": ">2.4"
+  },
   "devDependencies": {
     "@babel/core": "^7.23.6",
     "@babel/preset-env": "^7.23.6",

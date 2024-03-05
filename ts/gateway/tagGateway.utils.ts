@@ -1,5 +1,4 @@
-import { TagComponent, redrawTag, tagElement, Tag } from "../index.js"
-// import { onNextStateOnly } from "../state.js"
+import { TagComponent, tagElement, Tag } from "taggedjs"
 import { loadTagGateway } from "./loadTagGateway.function.js"
 import { TagGatewayComponent } from "./tagGateway.function.js"
 
