@@ -1,6 +1,7 @@
+import { tagGateway } from "taggedjs-gateway"
 import { GatewayTest } from "./GatewayTest.js"
 import { renderCountDiv } from "./renderCount.component.js"
-import { setLet, html, tag, tagGateway, set } from "taggedjs"
+import { setLet, html, tag, set } from "taggedjs"
 
 export const gatewayDebug = tag(() => {
   let renderCount: number = setLet(0)(x => [renderCount, renderCount = x])

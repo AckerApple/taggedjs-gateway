@@ -20,6 +20,6 @@
   },
   "dependencies": {
     "taggedjs": "github:ackerapple/taggedjs",
-    "taggedjs-common": "github:ackerapple/taggedjs-common"
+    "taggedjs-gateway": "github:ackerapple/taggedjs-gateway"
   }
 }

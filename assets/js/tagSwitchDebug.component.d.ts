@@ -1,18 +1,19 @@
+import { Tag } from "taggedjs";
 type SelectedTag = null | string | undefined;
-export declare const tagSwitchDebug: import("taggedjs").TagComponentBase<[]>;
-export declare const ternaryPropTest: import("taggedjs").TagComponentBase<[{
+export declare const tagSwitchDebug: (props?: unknown, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
+export declare const ternaryPropTest: (props?: {
     selectedTag: string | undefined | null;
-}]>;
-export declare const tag1: import("taggedjs").TagComponentBase<[{
+} | undefined, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
+export declare const tag1: (props?: {
     title: string;
-}]>;
-export declare const tag2: import("taggedjs").TagComponentBase<[{
+} | undefined, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
+export declare const tag2: (props?: {
     title: string;
-}]>;
-export declare const tag3: import("taggedjs").TagComponentBase<[{
+} | undefined, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
+export declare const tag3: (props?: {
     title: string;
-}]>;
-export declare const arraySwitching: import("taggedjs").TagComponentBase<[{
+} | undefined, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
+export declare const arraySwitching: (props?: {
     selectedTag: SelectedTag;
-}]>;
+} | undefined, children?: import("taggedjs").TagChildrenInput | undefined) => Tag;
 export {};
