@@ -1,13 +1,29 @@
 import { TagComponent, TagComponentBase } from "taggedjs"
 import { checkElement, getTagId } from "./tagGateway.utils.js"
 
-const namedTimeouts: Record<string, any> = {}
+const namedTimeouts: Record<string, Gateway> = {}
 
 export type TagGatewayComponent = TagComponent | TagComponentBase<[props: unknown]>
 
+type GetProps = () => unknown
+
+type Gateway = {
+  id: string
+
+  props: <T extends string>(
+    key: T, // must be unique across entire app
+    getProps: GetProps,
+  ) => T
+
+  propMemory: {
+    key: string, // must be unique across entire app
+    getProps: GetProps,
+  }[]
+}
+
 export const tagGateway = function tagGateway(
   component: TagGatewayComponent,
-): {id: string} {
+): Gateway {
   const id = getTagId(component)
 
   if(namedTimeouts[id]) {
@@ -47,14 +63,26 @@ export const tagGateway = function tagGateway(
     }, interval)
   }
 
+  const gateway: Gateway = {
+    id,
+    propMemory: [],
+    props: (
+      key,
+      getProps,
+    ) => {
+      gateway.propMemory.push({key, getProps})
+      return key
+    }
+  }
+
   const elementCounts = findElements()
   if(elementCounts) {
-    return { id }
+    return gateway
   }
 
   findElement()
 
-  namedTimeouts[id] = { id }
+  namedTimeouts[id] = gateway
 
   return namedTimeouts[id]
 }

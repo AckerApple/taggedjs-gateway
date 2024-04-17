@@ -154,7 +154,9 @@ export type Gateway = {
   updateTag: () => unknown
 }
 
-export function checkByElement(element: HTMLElement | Element){
+export function checkByElement(
+  element: HTMLElement | Element
+){
   const id = element.id || element.getAttribute('id')
 
   if(!id) {
@@ -188,7 +190,12 @@ export function checkElement(
   const props = parsePropsString(element)
 
   try {
-    const { tag } = tagElement(component as TagComponent, element, props)
+    const { tag } = tagElement(
+      component as TagComponent,
+      element,
+      props
+    )
+    
     // watch element AND add to gateways[id].push()
     return watchElement(id, element as HTMLElement, tag, component)
   } catch (err) {
