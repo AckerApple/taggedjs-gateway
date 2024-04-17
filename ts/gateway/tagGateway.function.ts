@@ -14,7 +14,7 @@ export const tagGateway = function tagGateway(
     return namedTimeouts[id]
   }
 
-  let intervalId: NodeJS.Timeout
+  let intervalId: any // NodeJS.Timeout
   let hitCount = 0
   const interval = 5
 
