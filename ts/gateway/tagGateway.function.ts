@@ -1,33 +1,32 @@
 import { TagComponent, TagComponentBase } from "taggedjs"
-import { checkElement, getTagId } from "./tagGateway.utils.js"
+import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
 
-const namedTimeouts: Record<string, Gateway> = {}
+export const tagGateways: Record<string, TagGateway> = {}
 
 export type TagGatewayComponent = TagComponent | TagComponentBase<[props: unknown]>
 
-type GetProps = () => unknown
+type SetProps = <T extends string>(
+  key: T, // must be unique across entire app
+  props: any,
+) => T
 
-type Gateway = {
+export type TagGateway = {
   id: string
 
-  props: <T extends string>(
-    key: T, // must be unique across entire app
-    getProps: GetProps,
-  ) => T
+  props: SetProps
 
   propMemory: {
-    key: string, // must be unique across entire app
-    getProps: GetProps,
-  }[]
+    [key: string]: any
+  }
 }
 
 export const tagGateway = function tagGateway(
   component: TagGatewayComponent,
-): Gateway {
+): TagGateway {
   const id = getTagId(component)
 
-  if(namedTimeouts[id]) {
-    return namedTimeouts[id]
+  if(tagGateways[id]) {
+    return tagGateways[id]
   }
 
   let intervalId: any // NodeJS.Timeout
@@ -45,7 +44,7 @@ export const tagGateway = function tagGateway(
     if(intervalId) {
       clearInterval(intervalId)
     }
-    delete namedTimeouts[id]
+    delete tagGateways[id]
 
     return elements.length
   }
@@ -63,14 +62,14 @@ export const tagGateway = function tagGateway(
     }, interval)
   }
 
-  const gateway: Gateway = {
+  const gateway: TagGateway = {
     id,
-    propMemory: [],
+    propMemory: {},
     props: (
       key,
       getProps,
     ) => {
-      gateway.propMemory.push({key, getProps})
+      gateway.propMemory[key] = getProps
       return key
     }
   }
@@ -82,16 +81,16 @@ export const tagGateway = function tagGateway(
 
   findElement()
 
-  namedTimeouts[id] = gateway
+  tagGateways[id] = gateway
 
-  return namedTimeouts[id]
+  return tagGateways[id]
 }
 
 function checkTagElementsById(
   id: string,
   component: TagGatewayComponent,
 ) {
-  const elements = document.querySelectorAll('#' + id)
+  const elements = document.querySelectorAll(`[tag="${id}"]`)
   return checkTagElements(id, elements, component)
 }
 
@@ -100,7 +99,7 @@ function checkTagElements(
   elements: NodeListOf<Element>,
   component: TagGatewayComponent,
 ) {
-  elements.forEach(element => checkElement(id, element, component))
+  elements.forEach(element => checkElementGateway(id, element, component))
 
   return elements
 }

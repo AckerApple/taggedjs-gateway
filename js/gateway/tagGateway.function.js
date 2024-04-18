@@ -1,9 +1,9 @@
-import { checkElement, getTagId } from "./tagGateway.utils.js";
-const namedTimeouts = {};
+import { checkElementGateway, getTagId } from "./tagGateway.utils.js";
+export const tagGateways = {};
 export const tagGateway = function tagGateway(component) {
     const id = getTagId(component);
-    if (namedTimeouts[id]) {
-        return namedTimeouts[id];
+    if (tagGateways[id]) {
+        return tagGateways[id];
     }
     let intervalId; // NodeJS.Timeout
     let hitCount = 0;
@@ -17,7 +17,7 @@ export const tagGateway = function tagGateway(component) {
         if (intervalId) {
             clearInterval(intervalId);
         }
-        delete namedTimeouts[id];
+        delete tagGateways[id];
         return elements.length;
     }
     function findElement() {
@@ -30,20 +30,28 @@ export const tagGateway = function tagGateway(component) {
             findElements();
         }, interval);
     }
+    const gateway = {
+        id,
+        propMemory: {},
+        props: (key, getProps) => {
+            gateway.propMemory[key] = getProps;
+            return key;
+        }
+    };
     const elementCounts = findElements();
     if (elementCounts) {
-        return { id };
+        return gateway;
     }
     findElement();
-    namedTimeouts[id] = { id };
-    return namedTimeouts[id];
+    tagGateways[id] = gateway;
+    return tagGateways[id];
 };
 function checkTagElementsById(id, component) {
-    const elements = document.querySelectorAll('#' + id);
+    const elements = document.querySelectorAll(`[tag="${id}"]`);
     return checkTagElements(id, elements, component);
 }
 function checkTagElements(id, elements, component) {
-    elements.forEach(element => checkElement(id, element, component));
+    elements.forEach(element => checkElementGateway(id, element, component));
     return elements;
 }
 //# sourceMappingURL=tagGateway.function.js.map

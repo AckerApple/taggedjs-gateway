@@ -1,5 +1,7 @@
-import { tagElement } from "taggedjs";
+import { tagElement, renderTagSupport } from "taggedjs";
 import { loadTagGateway } from "./loadTagGateway.function.js";
+import { tagGateways } from "./tagGateway.function.js";
+import { tagClosed$ } from "taggedjs/js/tagRunner.js";
 const gateways = {};
 export const gatewayTagIds = {};
 export function checkAllGateways() {
@@ -11,7 +13,7 @@ export function checkGateways(gateways) {
 function checkGateway(gateway) {
     const { element } = gateway;
     if (document.body.contains(element)) {
-        return; // its still good, do not continue to destroy
+        return true; // its still good, do not continue to destroy
     }
     destroyGateway(gateway);
     return false;
@@ -26,35 +28,51 @@ export function getTagId(component) {
     const componentString = functionToHtmlId(component);
     return '__tagTemplate_' + componentString;
 }
-function parsePropsString(element) {
-    const propsString = element.getAttribute('props');
-    if (!propsString) {
-        return { element };
-    }
-    try {
-        const props = JSON.parse(propsString);
-        // attribute eventProps as output bindings
-        const eventPropsString = element.getAttribute('events');
-        if (eventPropsString) {
-            eventPropsString.split(',').map(x => x.trim()).map((name) => {
-                props[name] = (value) => dispatchEvent(name, { detail: { [name]: value } });
-            });
-        }
-        const dispatchEvent = function (name, eventData) {
-            const event = new CustomEvent(name, eventData);
-            element.dispatchEvent(event);
-        };
-        // props.dispatchEvent = dispatchEvent
+function parseElmProps(id, // element.id
+element) {
+    const propsId = element.getAttribute('props');
+    if (propsId) {
+        const props = tagGateways[id].propMemory[propsId];
+        parseElmOutputs(element, props);
         return props;
     }
-    catch (err) {
-        console.warn('Failed to parse props on element', { element, propsString });
-        throw err;
+    const attrNames = element.getAttributeNames();
+    const props = attrNames.reduce((all, attrName) => {
+        const nameSplit = attrName.split(':');
+        let value = element.getAttribute(attrName);
+        if (nameSplit.length > 1) {
+            switch (nameSplit[1]) {
+                case 'number':
+                    value = Number(value);
+                    break;
+            }
+            attrName = nameSplit[0];
+        }
+        all[attrName] = value;
+        return all;
+    }, {});
+    delete props.tag;
+    parseElmOutputs(element, props);
+    return props;
+}
+function parseElmOutputs(element, props) {
+    // attribute eventProps as output bindings
+    const eventPropsString = element.getAttribute('events');
+    if (eventPropsString) {
+        eventPropsString.split(',').map(x => x.trim()).map((name) => {
+            props[name] = (value) => dispatchEvent(name, { detail: { [name]: value } });
+        });
     }
+    const dispatchEvent = function (name, eventData) {
+        const event = new CustomEvent(name, eventData);
+        element.dispatchEvent(event);
+    };
+    return props;
 }
 /** adds to gateways[id].push */
-function watchElement(id, targetNode, tag, component) {
-    let lastTag = tag;
+function watchElement(id, // tag id
+targetNode, tag, component) {
+    const tagGateway = tagGateways[id];
     const observer = new MutationObserver(mutationsList => {
         if (!checkGateway(gateway)) {
             return;
@@ -67,18 +85,33 @@ function watchElement(id, targetNode, tag, component) {
     });
     function updateTag() {
         const templater = tag.tagSupport.templater;
-        const oldProps = templater.tagSupport.propsConfig.latest;
-        const newProps = parsePropsString(targetNode);
-        templater.tagSupport.propsConfig.latest = newProps;
-        const isSameProps = JSON.stringify(oldProps) === JSON.stringify(newProps);
+        // const propsConfig = templater.tagSupport.propsConfig
+        const latestTag = templater.global.newest;
+        const prevProps = latestTag.tagSupport.templater.props;
+        const newProps = parseElmProps(id, targetNode);
+        const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
+        // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
         if (isSameProps) {
             return; // no reason to update, same props
         }
-        templater.tagSupport.propsConfig.latest = newProps;
+        // propsConfig.latest = newProps
+        latestTag.tagSupport.templater.props = newProps;
+        // after the next tag currently being rendered, then redraw me
+        tagClosed$.toCallback(() => {
+            const latestTag = templater.global.newest;
+            const tagSupport = latestTag.tagSupport;
+            // tagSupport.propsConfig.latestCloned = newProps
+            // tagSupport.propsConfig.latest = newProps
+            tagSupport.templater.props = newProps;
+            renderTagSupport(tagSupport, false);
+        });
     }
     loadTagGateway(component);
     const gateway = {
-        id, tag, observer, component, element: targetNode, updateTag,
+        id, tag, observer, component,
+        element: targetNode,
+        updateTag,
+        tagGateway,
     };
     gateways[id] = gateways[id] || [];
     gateways[id].push(gateway);
@@ -102,7 +135,8 @@ function functionToHtmlId(func) {
     return cleanedString;
 }
 export function checkByElement(element) {
-    const id = element.id || element.getAttribute('id');
+    const gateway = element.gateway;
+    const id = gateway.id || element.getAttribute('tag');
     if (!id) {
         const message = 'Cannot check a tag on element with no id attribute';
         console.warn(message, { id, element });
@@ -114,15 +148,15 @@ export function checkByElement(element) {
         console.warn(message, { id, element });
         throw new Error(message);
     }
-    return checkElement(id, element, component);
+    return checkElementGateway(id, element, component);
 }
-export function checkElement(id, element, component) {
+export function checkElementGateway(id, element, component) {
     const gateway = element.gateway;
     if (gateway) {
         gateway.updateTag();
         return gateway;
     }
-    const props = parsePropsString(element);
+    const props = parseElmProps(id, element);
     try {
         const { tag } = tagElement(component, element, props);
         // watch element AND add to gateways[id].push()
