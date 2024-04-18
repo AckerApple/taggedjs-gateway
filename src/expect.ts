@@ -1,19 +1,81 @@
 type Test = () => unknown
 const onlyTests: Test[] = []
-const tests: Test[] = []
+let tests: Test[] = []
+let tab = 0
+
+export function describe(label: string, run: () => any) {
+  tests.push(() => {
+    const oldTests = tests
+    tests = []
+    
+    try {
+      console.debug('  '.repeat(tab) + '↘ ' + label)
+      
+      ++tab
+      run()
+      runTests(tests)
+      
+      --tab
+    } catch (error) {
+      --tab
+      // console.debug(' '.repeat(tab) + '❌ ' + label)
+      throw error
+    } finally {
+      tests = oldTests
+    }
+  })
+}
+
+describe.only = (label: string, run: () => any) => {
+  onlyTests.push(() => {
+    const oldTests = tests
+    tests = []
+    
+    try {
+      console.debug('  '.repeat(tab) + '↘ ' + label)
+      
+      ++tab
+      
+      run()
+      runTests(tests)
+      
+      --tab
+    } catch (error) {
+      --tab
+      // console.debug(' '.repeat(tab) + '❌ ' + label)
+      throw error
+    } finally {
+      tests = oldTests
+    }
+  })
+}
 
 export function it(label: string, run: () => any) {
-  tests.push(() => {
-    console.debug(label)
-    run()
+  tests.push(async () => {
+    try {
+      await run()
+      console.debug(' '.repeat(tab) + '✅ ' + label)
+    } catch (error) {
+      console.debug(' '.repeat(tab) + '❌ ' + label)
+      throw error
+    }
   })
 }
 
 it.only = (label: string, run: () => any) => {
-  onlyTests.push(() => {
-    console.debug(label)
-    run()
+  onlyTests.push(async () => {
+    try {
+      await run()
+      console.debug('✅ ' + label)
+    } catch (error) {
+      console.debug('❌ ' + label)
+      throw error
+    }
   })
+}
+
+it.skip = (label: string, run: () => any) => {
+  console.debug('⏭️ Skipped ' + label)
 }
 
 export function execute() {
@@ -25,7 +87,14 @@ export function execute() {
 }
 
 function runTests(tests: Test[]) {
-  tests.forEach(test => test())
+  return Promise.all(tests.map(test => {    
+    try {
+      return test()
+    } catch (err) {
+      console.error(`Error testing ${test.name}`)
+      throw err
+    }
+  }))
 }
 
 export function expect(expected: unknown) {
@@ -46,6 +115,16 @@ export function expect(expected: unknown) {
 
       const message = customMessage || `Expected ${typeof(expected)} ${JSON.stringify(expected)} to be ${typeof(received)} ${JSON.stringify(received)}`
       console.error(message, {received, expected})
+      throw new Error(message)
+    },
+    toBeGreaterThan: (amount: number, customMessage?: string) => {
+      const expectNum = expected as number
+      if(!isNaN(expectNum) && expectNum > amount) {
+        return
+      }
+
+      const message = customMessage || `Expected ${typeof(expected)} ${JSON.stringify(expected)} to be greater than amount`
+      console.error(message, {amount, expected})
       throw new Error(message)
     }
   }

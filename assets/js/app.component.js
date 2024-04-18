@@ -1,18 +1,20 @@
-import { html, tag, setLet, onInit } from "taggedjs";
+import { html, tag, letState, onInit } from "taggedjs";
 import { runTests } from "./tests.js";
 import { renderCountDiv } from "./renderCount.component.js";
 import { gatewayDebug } from "./gatewayDebug.component.js";
 export const App = tag(() => {
-    console.log('render app.js');
-    let _firstState = setLet('app first state')(x => [_firstState, _firstState = x]);
-    let toggleValue = setLet(false)(x => [toggleValue, toggleValue = x]);
-    let renderCount = setLet(0)(x => [renderCount, renderCount = x]);
+    let _firstState = letState('app first state')(x => [_firstState, _firstState = x]);
+    let toggleValue = letState(false)(x => [toggleValue, toggleValue = x]);
+    let appCounter = letState(0)(x => [appCounter, appCounter = x]);
+    let renderCount = letState(0)(x => [renderCount, renderCount = x]);
     const toggle = () => {
         toggleValue = !toggleValue;
     };
     function runTesting(manual = true) {
-        setTimeout(() => {
-            const result = runTests();
+        const waitFor = 1000;
+        setTimeout(async () => {
+            console.debug('🏃 Running tests...');
+            const result = await runTests();
             if (!manual) {
                 return;
             }
@@ -21,11 +23,12 @@ export const App = tag(() => {
                 return;
             }
             alert('❌ tests failed. See console for more details');
-        }, 3000); // cause delay to be separate from renders
+        }, waitFor); // cause delay to be separate from renders
     }
     ++renderCount;
     onInit(() => {
-        runTesting(false);
+        console.log('app init should only run once');
+        // runTesting(false)
     });
     const content = html `<!--app.js-->
     <h1 id="h1-app">🌉 TaggedJs Gateway</h1>
@@ -41,6 +44,8 @@ export const App = tag(() => {
         ${gatewayDebug()}
       </fieldset>
     </div>
+
+    <button type="button" onclick=${() => runTesting(true)}>run testing</button>
   `;
     return content;
 });

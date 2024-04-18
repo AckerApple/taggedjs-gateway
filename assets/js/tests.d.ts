@@ -1,1 +1,1 @@
-export declare function runTests(): boolean;
+export declare function runTests(): Promise<boolean>;

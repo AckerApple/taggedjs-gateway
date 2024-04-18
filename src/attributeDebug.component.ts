@@ -1,8 +1,8 @@
-import { html, setLet, tag } from "taggedjs"
+import { html, letState, tag } from "taggedjs"
 
 export const attributeDebug = tag(() => {
-  let selected: string = setLet('a')(x => [selected, selected = x])
-  let isOrange: boolean = setLet(true)(x => [isOrange, isOrange = x])
+  let selected: string = letState('a')(x => [selected, selected = x])
+  let isOrange: boolean = letState(true)(x => [isOrange, isOrange = x])
 
   return html`
     <input onchange=${(event: any) => selected = event.target.value} placeholder="a b or c" />

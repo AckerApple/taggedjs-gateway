@@ -1,8 +1,8 @@
-import { html, set, tag } from "taggedjs"
+import { html, state, tag } from "taggedjs"
 import { gatewayDebug } from "./gatewayDebug.component"
 
 export const IsolatedApp = tag(() => {
-  const stateTest = set('isolated-app-state')  
+  const stateTest = state('isolated-app-state')  
   return html`<!--isolatedApp.js-->
     <h1 id="app">🌉 TaggedJs Gateway - isolated</h1>
 
