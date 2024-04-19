@@ -120,33 +120,7 @@ function watchElement(
   })
 
   function updateTag() {
-    const templater = tag.tagSupport.templater
-    // const propsConfig = templater.tagSupport.propsConfig
-    const latestTag = templater.global.newest as Tag
-    const prevProps = latestTag.tagSupport.templater.props
-    const newProps = parseElmProps(id, targetNode)
-
-    const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps)
-    // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
-    
-    if(isSameProps) {
-      return // no reason to update, same props
-    }
-    
-    // propsConfig.latest = newProps
-    latestTag.tagSupport.templater.props = newProps
-
-    // after the next tag currently being rendered, then redraw me
-    tagClosed$.toCallback(() => {
-      const latestTag = templater.global.newest as Tag
-      const tagSupport = latestTag.tagSupport
-      
-      // tagSupport.propsConfig.latestCloned = newProps
-      // tagSupport.propsConfig.latest = newProps
-      tagSupport.templater.props = newProps
-      
-      renderTagSupport(tagSupport, false)  
-    })
+    tagGateway.updateTag()
   }
   
   loadTagGateway(component)
@@ -250,4 +224,37 @@ export function checkElementGateway(
     console.warn('Failed to render component to element', {component, element, props})
     throw err
   }
+}
+
+export function updateFromTag(
+  id: string,
+  targetNode: Element,
+  tag: Tag
+) {
+  const templater = tag.tagSupport.templater
+  const latestTag = templater.global.newest as Tag
+  const prevProps = latestTag.tagSupport.templater.props
+  const newProps = parseElmProps(id, targetNode)
+
+  const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps)
+  // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
+  
+  if(isSameProps) {
+    return // no reason to update, same props
+  }
+  
+  // propsConfig.latest = newProps
+  latestTag.tagSupport.templater.props = newProps
+
+  // after the next tag currently being rendered, then redraw me
+  tagClosed$.toCallback(() => {
+    const latestTag = templater.global.newest as Tag
+    const tagSupport = latestTag.tagSupport
+    
+    // tagSupport.propsConfig.latestCloned = newProps
+    // tagSupport.propsConfig.latest = newProps
+    tagSupport.templater.props = newProps
+    
+    renderTagSupport(tagSupport, false)  
+  })
 }

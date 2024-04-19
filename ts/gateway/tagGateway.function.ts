@@ -1,5 +1,5 @@
 import { TagComponent, TagComponentBase } from "taggedjs"
-import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
+import { checkElementGateway, getTagId, updateFromTag } from "./tagGateway.utils.js"
 
 export const tagGateways: Record<string, TagGateway> = {}
 
@@ -15,8 +15,13 @@ export type TagGateway = {
 
   props: SetProps
 
+  updateTag: () => any
+
   propMemory: {
-    [key: string]: any
+    [key: string]: {
+      callCount: number
+      props: any
+    }
   }
 }
 
@@ -69,8 +74,21 @@ export const tagGateway = function tagGateway(
       key,
       getProps,
     ) => {
-      gateway.propMemory[key] = getProps
+      const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
+        props: getProps, callCount: 0,
+      }
+
+      memory.props = getProps
+      ++memory.callCount
+
       return key
+    },
+    updateTag: (tag: Tag) => {
+      updateFromTag(
+        id,
+        targetNode,
+        tag,    
+      )  
     }
   }
 

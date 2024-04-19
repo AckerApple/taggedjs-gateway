@@ -22,12 +22,17 @@ const yourTagComponent = tag(({someNumber, another}) => {
   selector: 'dump',
   template: `
     <!-- simple variable props only -->
-    <div [attr.tag:id]="yourTag.id" [attr.someNumber]="value" [attr.another]="variable"></div>
+    <div [attr.tag:id]="yourTag.id"
+      [attr.someNumber]="value"
+      [attr.another]="variable"
+    ></div>
     
     <!-- OR -->
 
     <!-- complex variable props -->
-    <div [attr.tag]="yourTag.id" [attr.props]="yourTag.props({ someNumber:value, another:variable })"></div>
+    <div [attr.tag]="yourTag.id"
+      [attr.props]="yourTag.props({ someNumber:value, another:variable })"
+    ></div>
   `,
 }) export class DumpComponent {
   yourTagId = loadTagGateway( yourTagComponent )
