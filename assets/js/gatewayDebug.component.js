@@ -14,20 +14,22 @@ export const gatewayDebug = tag(() => {
     return html `
     hello world
     <!-- each prop as attr -->
-    <div
-      tag=${gateway.id}
-      test:number=${gatewayData.test}
-      test2=${gatewayData.test}
-      string=${gatewayData.testString}
-    ></div>
+    <div id="simple-prop-test-wrap">
+      <div
+        tag=${gateway.id}
+        test:number=${gatewayData.test}
+        test2=${gatewayData.test}
+        string=${gatewayData.testString}
+      ></div>
+    </div>
 
     <!-- props as one attr -->
-    ${ /*
-    <div
-      tag=${gateway.id}
-      props=${gateway.props('props-as-one-attr', gatewayData)}
-    ></div>
-    */false}
+    <div id="props-test-wrap">
+      <div
+        tag=${gateway.id}
+        props=${gateway.props('props-as-one-attr', gatewayData)}
+      ></div>
+    </div>
 
     <!-- output events -->
     ${ /*
