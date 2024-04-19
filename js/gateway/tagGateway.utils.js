@@ -1,11 +1,10 @@
-import { tagElement, renderTagSupport } from "taggedjs";
+import { tagElement } from "taggedjs";
 import { loadTagGateway } from "./loadTagGateway.function.js";
 import { tagGateways } from "./tagGateway.function.js";
-import { tagClosed$ } from "taggedjs/js/tagRunner.js";
-const gateways = {};
-export const gatewayTagIds = {};
+import { parseElmProps } from "./parseProps.js";
+export const gateways = {};
 export function checkAllGateways() {
-    Object.entries(gateways).forEach(([id, gateways]) => checkGateways(gateways));
+    Object.entries(gateways).forEach(([id, gateways]) => checkGateways(gateways.gates));
 }
 export function checkGateways(gateways) {
     gateways.forEach(gateway => checkGateway(gateway));
@@ -28,47 +27,6 @@ export function getTagId(component) {
     const componentString = functionToHtmlId(component);
     return '__tagTemplate_' + componentString;
 }
-function parseElmProps(id, // element.id
-element) {
-    const propsId = element.getAttribute('props');
-    if (propsId) {
-        const props = tagGateways[id].propMemory[propsId];
-        parseElmOutputs(element, props);
-        return props;
-    }
-    const attrNames = element.getAttributeNames();
-    const props = attrNames.reduce((all, attrName) => {
-        const nameSplit = attrName.split(':');
-        let value = element.getAttribute(attrName);
-        if (nameSplit.length > 1) {
-            switch (nameSplit[1]) {
-                case 'number':
-                    value = Number(value);
-                    break;
-            }
-            attrName = nameSplit[0];
-        }
-        all[attrName] = value;
-        return all;
-    }, {});
-    delete props.tag;
-    parseElmOutputs(element, props);
-    return props;
-}
-function parseElmOutputs(element, props) {
-    // attribute eventProps as output bindings
-    const eventPropsString = element.getAttribute('events');
-    if (eventPropsString) {
-        eventPropsString.split(',').map(x => x.trim()).map((name) => {
-            props[name] = (value) => dispatchEvent(name, { detail: { [name]: value } });
-        });
-    }
-    const dispatchEvent = function (name, eventData) {
-        const event = new CustomEvent(name, eventData);
-        element.dispatchEvent(event);
-    };
-    return props;
-}
 /** adds to gateways[id].push */
 function watchElement(id, // tag id
 targetNode, tag, component) {
@@ -84,27 +42,7 @@ targetNode, tag, component) {
         }
     });
     function updateTag() {
-        const templater = tag.tagSupport.templater;
-        // const propsConfig = templater.tagSupport.propsConfig
-        const latestTag = templater.global.newest;
-        const prevProps = latestTag.tagSupport.templater.props;
-        const newProps = parseElmProps(id, targetNode);
-        const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
-        // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
-        if (isSameProps) {
-            return; // no reason to update, same props
-        }
-        // propsConfig.latest = newProps
-        latestTag.tagSupport.templater.props = newProps;
-        // after the next tag currently being rendered, then redraw me
-        tagClosed$.toCallback(() => {
-            const latestTag = templater.global.newest;
-            const tagSupport = latestTag.tagSupport;
-            // tagSupport.propsConfig.latestCloned = newProps
-            // tagSupport.propsConfig.latest = newProps
-            tagSupport.templater.props = newProps;
-            renderTagSupport(tagSupport, false);
-        });
+        tagGateway.updateTag(tag, targetNode);
     }
     loadTagGateway(component);
     const gateway = {
@@ -114,7 +52,7 @@ targetNode, tag, component) {
         tagGateway,
     };
     gateways[id] = gateways[id] || [];
-    gateways[id].push(gateway);
+    gateways[id].gates.push(gateway);
     targetNode.gateway = gateway;
     // Configure the observer to watch for changes in child nodes and attributes
     const config = { attributes: true };
@@ -142,7 +80,7 @@ export function checkByElement(element) {
         console.warn(message, { id, element });
         throw new Error(message);
     }
-    const component = gatewayTagIds[id];
+    const component = gateways[id].tagComponent;
     if (!component) {
         const message = `Cannot find a tag registered by id of ${id}`;
         console.warn(message, { id, element });
@@ -156,9 +94,12 @@ export function checkElementGateway(id, element, component) {
         gateway.updateTag();
         return gateway;
     }
-    const props = parseElmProps(id, element);
+    const propMemory = parseElmProps(id, element);
+    const props = propMemory.props;
     try {
         const { tag } = tagElement(component, element, props);
+        propMemory.element = element;
+        propMemory.tag = tag;
         // watch element AND add to gateways[id].push()
         return watchElement(id, element, tag, component);
     }

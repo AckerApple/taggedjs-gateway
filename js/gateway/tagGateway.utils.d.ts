@@ -1,7 +1,10 @@
 import { TagComponent, Tag } from "taggedjs";
 import { TagGateway, TagGatewayComponent } from "./tagGateway.function.js";
-export declare const gatewayTagIds: {
-    [id: string]: TagComponent;
+export declare const gateways: {
+    [id: string]: {
+        gates: Gateway[];
+        tagComponent: TagComponent;
+    };
 };
 export declare function checkAllGateways(): void;
 export declare function checkGateways(gateways: Gateway[]): void;

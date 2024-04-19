@@ -1,5 +1,5 @@
 import { initWebComponents } from "./gateway.web.component.js";
-import { gatewayTagIds, getTagId } from "./tagGateway.utils.js";
+import { gateways, getTagId } from "./tagGateway.utils.js";
 let hasInitWebComponents = false;
 export function loadTagGateway(component) {
     if (!hasInitWebComponents) {
@@ -12,7 +12,11 @@ export function loadTagGateway(component) {
         hasInitWebComponents = true;
     }
     const id = getTagId(component);
-    gatewayTagIds[id] = component;
+    gateways[id] = gateways[id] || {
+        gates: [],
+        tagComponent: component
+    };
+    gateways[id].tagComponent = component;
     return id;
 }
 //# sourceMappingURL=loadTagGateway.function.js.map

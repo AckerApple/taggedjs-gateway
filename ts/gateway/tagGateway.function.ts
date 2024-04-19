@@ -1,5 +1,7 @@
-import { TagComponent, TagComponentBase } from "taggedjs"
-import { checkElementGateway, getTagId, updateFromTag } from "./tagGateway.utils.js"
+import { Tag, TagComponent, TagComponentBase, renderTagSupport } from "taggedjs"
+import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
+import { tagClosed$ } from "taggedjs/js/tagRunner.js"
+import { parseElmProps } from "./parseProps.js"
 
 export const tagGateways: Record<string, TagGateway> = {}
 
@@ -15,14 +17,19 @@ export type TagGateway = {
 
   props: SetProps
 
-  updateTag: () => any
+  updateTag: (tag: Tag, element: Element) => any
 
   propMemory: {
-    [key: string]: {
-      callCount: number
-      props: any
-    }
+    [key: string]: PropMemory
   }
+}
+
+export type PropMemory = {
+  callCount: number
+  props: any
+
+  element?: Element
+  tag?: Tag
 }
 
 export const tagGateway = function tagGateway(
@@ -72,21 +79,28 @@ export const tagGateway = function tagGateway(
     propMemory: {},
     props: (
       key,
-      getProps,
+      props,
     ) => {
       const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
-        props: getProps, callCount: 0,
+        props,
+        callCount: 0,
       }
 
-      memory.props = getProps
+      memory.props = props
       ++memory.callCount
+
+      // new props given after init will be analyzed to trigger new render
+      const {element, tag} = memory
+      if(element && tag) {
+        gateway.updateTag(tag, element)
+      }
 
       return key
     },
-    updateTag: (tag: Tag) => {
+    updateTag: (tag: Tag, element: Element) => {
       updateFromTag(
         id,
-        targetNode,
+        element,
         tag,    
       )  
     }
@@ -120,4 +134,39 @@ function checkTagElements(
   elements.forEach(element => checkElementGateway(id, element, component))
 
   return elements
+}
+
+function updateFromTag(
+  id: string,
+  targetNode: Element,
+  tag: Tag
+) {
+  const templater = tag.tagSupport.templater
+  const latestTag = templater.global.newest as Tag
+  // const prevProps = latestTag.tagSupport.templater.props
+  const prevProps = latestTag.tagSupport.propsConfig.latestCloned
+  const propMemory = parseElmProps(id, targetNode)
+  const newProps = propMemory.props
+
+  const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps)
+  // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
+  
+  if(isSameProps) {
+    return // no reason to update, same props
+  }
+  
+  // propsConfig.latest = newProps
+  latestTag.tagSupport.templater.props = newProps
+
+  // after the next tag currently being rendered, then redraw me
+  tagClosed$.toCallback(() => {
+    const latestTag = templater.global.newest as Tag
+    const tagSupport = latestTag.tagSupport
+    
+    // tagSupport.propsConfig.latestCloned = newProps
+    // tagSupport.propsConfig.latest = newProps
+    tagSupport.templater.props = newProps
+    
+    renderTagSupport(tagSupport, false)  
+  })
 }

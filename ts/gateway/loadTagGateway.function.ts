@@ -1,6 +1,6 @@
 import { Tag, TagChildrenInput, TagComponent } from "taggedjs"
 import { initWebComponents } from "./gateway.web.component.js"
-import { gatewayTagIds, getTagId } from "./tagGateway.utils.js"
+import { gateways, getTagId } from "./tagGateway.utils.js"
 
 let hasInitWebComponents = false
 
@@ -18,6 +18,12 @@ export function loadTagGateway(
   }
 
   const id = getTagId(component)
-  gatewayTagIds[id] = component
+  gateways[id] = gateways[id] || {
+    gates: [],
+    tagComponent: component
+  }
+
+  gateways[id].tagComponent = component
+  
   return id
 }
