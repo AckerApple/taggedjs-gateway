@@ -1,6 +1,6 @@
 {
   "name": "taggedjs-gateway",
-  "version": "0.1.6",
+  "version": "1.0.1",
   "description": "advanced technologies for tagged template reactive html",
   "main": "js/index.js",
   "type": "module",
@@ -18,7 +18,7 @@
   ],
   "author": "Acker Dawn Apple",
   "license": "MIT",
-  "peerDependencies": {
-    "taggedjs": ">=2.4"
+  "dependencies": {
+    "taggedjs": "github:ackerapple/taggedjs"
   }
 }

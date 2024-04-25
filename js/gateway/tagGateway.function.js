@@ -1,9 +1,12 @@
-import { checkElement, getTagId } from "./tagGateway.utils.js";
-const namedTimeouts = {};
+import { renderTagSupport } from "taggedjs";
+import { checkElementGateway, getTagId } from "./tagGateway.utils.js";
+import { tagClosed$ } from "taggedjs/js/tagRunner.js";
+import { parseElmProps } from "./parseProps.js";
+export const tagGateways = {};
 export const tagGateway = function tagGateway(component) {
     const id = getTagId(component);
-    if (namedTimeouts[id]) {
-        return namedTimeouts[id];
+    if (tagGateways[id]) {
+        return tagGateways[id];
     }
     let intervalId; // NodeJS.Timeout
     let hitCount = 0;
@@ -17,7 +20,7 @@ export const tagGateway = function tagGateway(component) {
         if (intervalId) {
             clearInterval(intervalId);
         }
-        delete namedTimeouts[id];
+        delete tagGateways[id];
         return elements.length;
     }
     function findElement() {
@@ -30,20 +33,65 @@ export const tagGateway = function tagGateway(component) {
             findElements();
         }, interval);
     }
+    const gateway = {
+        id,
+        propMemory: {},
+        props: (key, props) => {
+            const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
+                props,
+                callCount: 0,
+            };
+            memory.props = props;
+            ++memory.callCount;
+            // new props given after init will be analyzed to trigger new render
+            const { element, tag } = memory;
+            if (element && tag) {
+                gateway.updateTag(tag, element);
+            }
+            return key;
+        },
+        updateTag: (tag, element) => {
+            updateFromTag(id, element, tag);
+        }
+    };
     const elementCounts = findElements();
     if (elementCounts) {
-        return { id };
+        return gateway;
     }
     findElement();
-    namedTimeouts[id] = { id };
-    return namedTimeouts[id];
+    tagGateways[id] = gateway;
+    return tagGateways[id];
 };
 function checkTagElementsById(id, component) {
-    const elements = document.querySelectorAll('#' + id);
+    const elements = document.querySelectorAll(`[tag="${id}"]`);
     return checkTagElements(id, elements, component);
 }
 function checkTagElements(id, elements, component) {
-    elements.forEach(element => checkElement(id, element, component));
+    elements.forEach(element => checkElementGateway(id, element, component));
     return elements;
+}
+function updateFromTag(id, targetNode, tag) {
+    const templater = tag.tagSupport.templater;
+    const latestTag = templater.global.newest;
+    // const prevProps = latestTag.tagSupport.templater.props
+    const prevProps = latestTag.tagSupport.propsConfig.latestCloned;
+    const propMemory = parseElmProps(id, targetNode);
+    const newProps = propMemory.props;
+    const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
+    // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
+    if (isSameProps) {
+        return; // no reason to update, same props
+    }
+    // propsConfig.latest = newProps
+    latestTag.tagSupport.templater.props = newProps;
+    // after the next tag currently being rendered, then redraw me
+    tagClosed$.toCallback(() => {
+        const latestTag = templater.global.newest;
+        const tagSupport = latestTag.tagSupport;
+        // tagSupport.propsConfig.latestCloned = newProps
+        // tagSupport.propsConfig.latest = newProps
+        tagSupport.templater.props = newProps;
+        renderTagSupport(tagSupport, false);
+    });
 }
 //# sourceMappingURL=tagGateway.function.js.map
