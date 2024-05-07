@@ -1,4 +1,4 @@
-import { TagComponent, Tag } from "taggedjs";
+import { TagComponent, TagSupport } from "taggedjs";
 import { TagGateway, TagGatewayComponent } from "./tagGateway.function.js";
 export declare const gateways: {
     [id: string]: {
@@ -15,7 +15,7 @@ export type EventData = {
 };
 export type Gateway = {
     id: string;
-    tag: Tag;
+    tag: TagSupport;
     observer: MutationObserver;
     element: HTMLElement;
     component: TagGatewayComponent;

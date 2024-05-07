@@ -46,7 +46,9 @@ targetNode, tag, component) {
     }
     loadTagGateway(component);
     const gateway = {
-        id, tag, observer, component,
+        id, tag,
+        observer,
+        component,
         element: targetNode,
         updateTag,
         tagGateway,
@@ -102,11 +104,11 @@ export function checkElementGateway(id, element, component) {
     const propMemory = parseElmProps(id, element);
     const props = propMemory.props;
     try {
-        const { tag } = tagElement(component, element, props);
+        const { tagSupport } = tagElement(component, element, props);
         propMemory.element = element;
-        propMemory.tag = tag;
+        propMemory.tag = tagSupport;
         // watch element AND add to gateways[id].push()
-        return watchElement(id, element, tag, component);
+        return watchElement(id, element, tagSupport, component);
     }
     catch (err) {
         console.warn('Failed to render component to element', {
