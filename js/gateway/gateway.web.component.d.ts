@@ -7,5 +7,6 @@ export declare class TagElement extends HTMLElement {
     constructor();
     disconnectedCallback(): void;
 }
+export declare const tagName = "tag-element";
 /** Call me one time */
 export declare function initWebComponents(): void;

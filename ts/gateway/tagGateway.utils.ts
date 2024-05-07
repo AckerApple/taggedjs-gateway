@@ -1,7 +1,8 @@
-import { TagComponent, tagElement, Tag } from "taggedjs"
+import { TagComponent, tagElement, Tag, TagSupport } from "taggedjs"
 import { loadTagGateway } from "./loadTagGateway.function.js"
 import { PropMemory, TagGateway, TagGatewayComponent, tagGateways } from "./tagGateway.function.js"
 import { parseElmProps } from "./parseProps.js"
+import { Wrapper } from "taggedjs/js/TemplaterResult.class.js"
 
 export const gateways: {
   [id: string]: {
@@ -33,15 +34,16 @@ function checkGateway(gateway: Gateway) {
 
 export function destroyGateway(gateway: Gateway) {
   const {id, observer, tag} = gateway
-
   observer.disconnect()
   tag.destroy()
-
   delete gateways[id]
 }
 
-export function getTagId(component: TagGatewayComponent) {
-  const componentString = functionToHtmlId(component)
+export function getTagId(
+  component: Wrapper
+) {
+  const fun = component.original || component
+  const componentString = functionToHtmlId(fun)
   return '__tagTemplate_' + componentString
 }
 
@@ -49,7 +51,7 @@ export function getTagId(component: TagGatewayComponent) {
 function watchElement(
   id: string, // tag id
   targetNode: HTMLElement,
-  tag: Tag,
+  tag: TagSupport,
   component: TagGatewayComponent,
 ): Gateway {
   const tagGateway = tagGateways[id]
@@ -73,7 +75,9 @@ function watchElement(
   loadTagGateway(component)
   
   const gateway: Gateway = {
-    id, tag, observer, component,
+    id, tag,
+    observer,
+    component,
     element: targetNode,
     updateTag,
     tagGateway,
@@ -114,7 +118,7 @@ export type EventData = {
 }
 export type Gateway = {
   id:string
-  tag:Tag
+  tag:TagSupport
   observer: MutationObserver
   element: HTMLElement
   component: TagGatewayComponent // TagComponent
@@ -125,23 +129,29 @@ export type Gateway = {
 export function checkByElement(
   element: HTMLElement | Element
 ){
-  const gateway = (element as any).gateway as Gateway
-  const id = gateway.id || element.getAttribute('tag')
+  const gateway = (element as any).gateway as Gateway | undefined
+  let tagName = gateway?.id || element.getAttribute('tag')
 
-  if(!id) {
+  if(!tagName) {
+    const message = 'Tagged gateway element must have a "tag" attribute which describes which tag to use'
+    console.warn(message, {element})
+    throw new Error(message)
+  }
+
+  if(!tagName) {
     const message = 'Cannot check a tag on element with no id attribute'
-    console.warn(message, {id, element})
+    console.warn(message, {tagName, element})
     throw new Error(message)
   }
 
-  const component = gateways[id].tagComponent
+  const component = gateways[tagName].tagComponent
   if(!component) {
-    const message = `Cannot find a tag registered by id of ${id}`
-    console.warn(message, {id, element})
+    const message = `Cannot find a tag registered by id of ${tagName}`
+    console.warn(message, {tagName, element})
     throw new Error(message)
   }
 
-  return checkElementGateway(id, element, component)
+  return checkElementGateway(tagName, element, component)
 }
 
 export function checkElementGateway(
@@ -160,19 +170,24 @@ export function checkElementGateway(
   const props = propMemory.props
 
   try {
-    const { tag } = tagElement(
+    const { tagSupport } = tagElement(
       component as TagComponent,
       element,
       props
     )
 
     propMemory.element = element
-    propMemory.tag = tag
+    propMemory.tag = tagSupport
     
     // watch element AND add to gateways[id].push()
-    return watchElement(id, element as HTMLElement, tag, component)
+    return watchElement(id, element as HTMLElement, tagSupport, component)
   } catch (err) {
-    console.warn('Failed to render component to element', {component, element, props})
+    console.warn('Failed to render component to element', {
+      component,
+      element,
+      props,
+      err,
+    })
     throw err
   }
 }

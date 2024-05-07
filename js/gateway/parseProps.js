@@ -9,6 +9,12 @@ element) {
         parseElmOutputs(element, propMemory.props);
         return propMemory;
     }
+    const propsJsonString = element.getAttribute('propsJson');
+    if (propsJsonString) {
+        const propsJson = JSON.parse(propsJsonString);
+        parseElmOutputs(element, propsJson);
+        return { props: propsJson, callCount: 0 };
+    }
     const attrNames = element.getAttributeNames();
     const props = attrNames.reduce((all, attrName) => {
         const nameSplit = attrName.split(':');

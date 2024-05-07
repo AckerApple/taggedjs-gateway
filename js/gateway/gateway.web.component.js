@@ -13,8 +13,9 @@ export class TagElement extends HTMLElement {
         destroyGateway(this.gateway);
     }
 }
+export const tagName = 'tag-element';
 /** Call me one time */
 export function initWebComponents() {
-    customElements.define('tag-element', TagElement);
+    customElements.define(tagName, TagElement);
 }
 //# sourceMappingURL=gateway.web.component.js.map

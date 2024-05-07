@@ -1,7 +1,7 @@
-import { Tag, TagComponent, TagComponentBase, renderTagSupport } from "taggedjs"
+import { TagComponent, TagComponentBase, TagSupport, renderTagSupport, setUse } from "taggedjs"
 import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
-import { tagClosed$ } from "taggedjs/js/tagRunner.js"
 import { parseElmProps } from "./parseProps.js"
+import { Wrapper } from "taggedjs/js/TemplaterResult.class.js"
 
 export const tagGateways: Record<string, TagGateway> = {}
 
@@ -17,7 +17,7 @@ export type TagGateway = {
 
   props: SetProps
 
-  updateTag: (tag: Tag, element: Element) => any
+  updateTag: (tag: TagSupport, element: Element) => any
 
   propMemory: {
     [key: string]: PropMemory
@@ -29,13 +29,13 @@ export type PropMemory = {
   props: any
 
   element?: Element
-  tag?: Tag
+  tag?: TagSupport
 }
 
 export const tagGateway = function tagGateway(
   component: TagGatewayComponent,
 ): TagGateway {
-  const id = getTagId(component)
+  const id = getTagId(component as unknown as Wrapper)
 
   if(tagGateways[id]) {
     return tagGateways[id]
@@ -97,7 +97,7 @@ export const tagGateway = function tagGateway(
 
       return key
     },
-    updateTag: (tag: Tag, element: Element) => {
+    updateTag: (tag: TagSupport, element: Element) => {
       updateFromTag(
         id,
         element,
@@ -139,12 +139,12 @@ function checkTagElements(
 function updateFromTag(
   id: string,
   targetNode: Element,
-  tag: Tag
+  tag: TagSupport
 ) {
-  const templater = tag.tagSupport.templater
-  const latestTag = templater.global.newest as Tag
+  const templater = tag.templater
+  const latestTag = tag.global.newest as TagSupport
   // const prevProps = latestTag.tagSupport.templater.props
-  const prevProps = latestTag.tagSupport.propsConfig.latestCloned
+  const prevProps = latestTag.propsConfig.latestCloned
   const propMemory = parseElmProps(id, targetNode)
   const newProps = propMemory.props
 
@@ -156,15 +156,13 @@ function updateFromTag(
   }
   
   // propsConfig.latest = newProps
-  latestTag.tagSupport.templater.props = newProps
+  latestTag.templater.props = newProps
 
   // after the next tag currently being rendered, then redraw me
-  tagClosed$.toCallback(() => {
-    const latestTag = templater.global.newest as Tag
-    const tagSupport = latestTag.tagSupport
+  setUse.memory.tagClosed$.toCallback(() => {
+    const latestTag = tag.global.newest as TagSupport
+    const tagSupport = latestTag
     
-    // tagSupport.propsConfig.latestCloned = newProps
-    // tagSupport.propsConfig.latest = newProps
     tagSupport.templater.props = newProps
     
     renderTagSupport(tagSupport, false)  

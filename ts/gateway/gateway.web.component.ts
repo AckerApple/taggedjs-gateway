@@ -17,7 +17,9 @@ export class TagElement extends HTMLElement {
   }
 }
 
+export const tagName = 'tag-element'
+
 /** Call me one time */
 export function initWebComponents() {
-  customElements.define('tag-element', TagElement)
+  customElements.define(tagName, TagElement)
 }

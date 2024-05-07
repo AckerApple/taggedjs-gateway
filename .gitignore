@@ -1,4 +1,6 @@
 # Logs
+js/
+.DS_Store
 .history
 logs
 *.log
