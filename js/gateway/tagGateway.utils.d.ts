@@ -1,5 +1,6 @@
 import { TagComponent, TagSupport } from "taggedjs";
 import { TagGateway, TagGatewayComponent } from "./tagGateway.function.js";
+import { Wrapper } from "taggedjs/js/TemplaterResult.class.js";
 export declare const gateways: {
     [id: string]: {
         gates: Gateway[];
@@ -9,7 +10,7 @@ export declare const gateways: {
 export declare function checkAllGateways(): void;
 export declare function checkGateways(gateways: Gateway[]): void;
 export declare function destroyGateway(gateway: Gateway): void;
-export declare function getTagId(component: TagGatewayComponent): string;
+export declare function getTagId(component: Wrapper): string;
 export type EventData = {
     detail: Record<string, any>;
 };
