@@ -1,6 +1,5 @@
-import { TagComponent, TagSupport } from "taggedjs";
+import { Wrapper, TagComponent, TagSupport } from "taggedjs";
 import { TagGateway, TagGatewayComponent } from "./tagGateway.function.js";
-import { Wrapper } from "taggedjs/js/TemplaterResult.class.js";
 export declare const gateways: {
     [id: string]: {
         gates: Gateway[];
