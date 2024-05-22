@@ -1,4 +1,6 @@
-export declare const renderCountDiv: import("taggedjs").TagComponentBase<[{
+export declare const renderCountDiv: (({ renderCount, name }: {
     renderCount: number;
     name: string;
-}]>;
+}) => import("taggedjs").Tag) & {
+    original: Function;
+};

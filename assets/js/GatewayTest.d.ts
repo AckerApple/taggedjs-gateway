@@ -1,1 +1,3 @@
-export declare const GatewayTest: import("taggedjs").TagComponentBase<[props: any]>;
+export declare const GatewayTest: ((props: any) => import("taggedjs").Tag) & {
+    original: Function;
+};

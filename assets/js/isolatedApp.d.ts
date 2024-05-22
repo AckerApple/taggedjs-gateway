@@ -1,1 +1,3 @@
-export declare const IsolatedApp: import("taggedjs").TagComponentBase<[]>;
+export declare const IsolatedApp: (() => import("taggedjs").Tag) & {
+    original: Function;
+};

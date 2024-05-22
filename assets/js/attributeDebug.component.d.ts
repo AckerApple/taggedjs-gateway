@@ -1,1 +1,3 @@
-export declare const attributeDebug: import("taggedjs").TagComponentBase<[]>;
+export declare const attributeDebug: (() => import("taggedjs").Tag) & {
+    original: Function;
+};
