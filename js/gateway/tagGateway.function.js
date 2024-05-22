@@ -75,7 +75,10 @@ function updateFromTag(id, targetNode, tag) {
     // const prevProps = latestTag.tagSupport.templater.props
     const prevProps = latestTag.propsConfig.latestCloned;
     const propMemory = parseElmProps(id, targetNode);
-    console.log('propMemory.props', propMemory.props);
+    console.log('propMemory.props - 98', {
+        props: propMemory.props,
+        prevProps,
+    });
     const newProps = [propMemory.props];
     const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
     // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
