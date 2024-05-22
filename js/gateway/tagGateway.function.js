@@ -24,7 +24,6 @@ export const tagGateway = function tagGateway(component) {
     }
     function findElement() {
         intervalId = setInterval(() => {
-            console.log('22');
             hitCount = hitCount + interval;
             if (hitCount >= 2000) {
                 clearInterval(intervalId);
