@@ -70,9 +70,8 @@ function checkTagElements(id, elements, component) {
     return elements;
 }
 function updateFromTag(id, targetNode, tag) {
-    const templater = tag.templater;
+    // const templater = tag.templater
     const latestTag = tag.global.newest;
-    // const prevProps = latestTag.tagSupport.templater.props
     const prevProps = latestTag.propsConfig.latestCloned;
     const propMemory = parseElmProps(id, targetNode);
     const newProps = [propMemory.props];
