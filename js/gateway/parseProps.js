@@ -31,9 +31,9 @@ element) {
         return all;
     }, {});
     delete props.tag;
-    parseElmOutputs(element, props);
+    parseElmOutputs(element, [props]);
     return {
-        props, callCount: 0,
+        props: [props], callCount: 0,
     };
 }
 function parseElmOutputs(element, props) {
@@ -41,7 +41,7 @@ function parseElmOutputs(element, props) {
     const eventPropsString = element.getAttribute('events');
     if (eventPropsString) {
         eventPropsString.split(',').map(x => x.trim()).map((name) => {
-            props[name] = (value) => dispatchEvent(name, { detail: { [name]: value } });
+            props[0][name] = (value) => dispatchEvent(name, { detail: { [name]: value } });
         });
     }
     const dispatchEvent = function (name, eventData) {
