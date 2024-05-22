@@ -37,10 +37,10 @@ export const tagGateway = function tagGateway(component) {
         propMemory: {},
         props: (key, props) => {
             const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
-                props,
+                props: [props],
                 callCount: 0,
             };
-            memory.props = props;
+            memory.props = [props];
             ++memory.callCount;
             // new props given after init will be analyzed to trigger new render
             const { element, tag } = memory;
@@ -75,7 +75,7 @@ function updateFromTag(id, targetNode, tag) {
     // const prevProps = latestTag.tagSupport.templater.props
     const prevProps = latestTag.propsConfig.latestCloned;
     const propMemory = parseElmProps(id, targetNode);
-    const newProps = propMemory.props;
+    const newProps = [propMemory.props];
     const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
     // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
     if (isSameProps) {
