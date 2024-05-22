@@ -24,7 +24,7 @@ export function destroyGateway(gateway) {
     delete gateways[id];
 }
 export function getTagId(component) {
-    const fun = component.parentWrap.original || component;
+    const fun = component.parentWrap?.original || component;
     const componentString = functionToHtmlId(fun);
     return '__tagTemplate_' + componentString;
 }
