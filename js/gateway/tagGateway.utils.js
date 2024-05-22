@@ -107,7 +107,7 @@ export function checkElementGateway(id, element, component) {
     const propMemory = parseElmProps(id, element);
     const props = propMemory.props;
     try {
-        const { tagSupport } = tagElement(component, element, props);
+        const { tagSupport } = tagElement(component, element, props[0]);
         propMemory.element = element;
         propMemory.tag = tagSupport;
         // watch element AND add to gateways[id].push()
@@ -117,7 +117,7 @@ export function checkElementGateway(id, element, component) {
         console.warn('Failed to render component to element', {
             component,
             element,
-            props,
+            props: props[0],
             err,
         });
         throw err;
