@@ -13,7 +13,7 @@ export type TagGateway = {
 };
 export type PropMemory = {
     callCount: number;
-    props: any;
+    props: [Record<string, any>];
     element?: Element;
     tag?: TagSupport;
 };
