@@ -1,6 +1,6 @@
 {
   "name": "taggedjs-gateway",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "advanced technologies for tagged template reactive html",
   "main": "js/index.js",
   "type": "module",

@@ -74,7 +74,7 @@ function updateFromTag(id, targetNode, tag) {
     const latestTag = tag.global.newest;
     const prevProps = latestTag.propsConfig.latestCloned;
     const propMemory = parseElmProps(id, targetNode);
-    const newProps = [propMemory.props];
+    const newProps = propMemory.props;
     const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
     // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
     console.log('propMemory.props - 98', {
@@ -86,7 +86,6 @@ function updateFromTag(id, targetNode, tag) {
     if (isSameProps) {
         return; // no reason to update, same props
     }
-    // propsConfig.latest = newProps
     latestTag.templater.props = newProps;
     // after the next tag currently being rendered, then redraw me
     setUse.memory.tagClosed$.toCallback(() => {
