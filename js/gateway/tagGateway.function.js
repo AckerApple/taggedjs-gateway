@@ -1,4 +1,4 @@
-import { renderTagSupport, setUse } from "taggedjs";
+import { renderSupport, setUseMemory } from "taggedjs";
 import { checkElementGateway, getTagId } from "./tagGateway.utils.js";
 import { parseElmProps } from "./parseProps.js";
 export const tagGateways = {};
@@ -70,9 +70,8 @@ function checkTagElements(id, elements, component) {
     return elements;
 }
 function updateFromTag(id, targetNode, tag) {
-    // const templater = tag.templater
-    const latestTag = tag.global.newest;
-    const prevProps = latestTag.propsConfig.latestCloned;
+    const latestTag = tag.subject.global.newest;
+    const prevProps = latestTag.propsConfig?.latest;
     const propMemory = parseElmProps(id, targetNode);
     const newProps = propMemory.props;
     const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
@@ -81,11 +80,11 @@ function updateFromTag(id, targetNode, tag) {
     }
     latestTag.templater.props = newProps;
     // after the next tag currently being rendered, then redraw me
-    setUse.memory.tagClosed$.toCallback(() => {
-        const latestTag = tag.global.newest;
-        const tagSupport = latestTag;
-        tagSupport.templater.props = newProps;
-        renderTagSupport(tagSupport, false);
+    setUseMemory.tagClosed$.toCallback(() => {
+        const latestTag = tag.subject.global.newest;
+        const anySupport = latestTag;
+        anySupport.templater.props = newProps;
+        renderSupport(anySupport);
     });
 }
 //# sourceMappingURL=tagGateway.function.js.map

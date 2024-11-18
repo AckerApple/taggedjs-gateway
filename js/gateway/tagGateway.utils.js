@@ -1,4 +1,4 @@
-import { tagElement } from "taggedjs";
+import { tagElement, destroySupport } from "taggedjs";
 import { loadTagGateway } from "./loadTagGateway.function.js";
 import { tagGateways } from "./tagGateway.function.js";
 import { parseElmProps } from "./parseProps.js";
@@ -20,7 +20,7 @@ function checkGateway(gateway) {
 export function destroyGateway(gateway) {
     const { id, observer, tag } = gateway;
     observer.disconnect();
-    tag.destroy();
+    destroySupport(tag, 0);
     delete gateways[id];
 }
 export function getTagId(component) {
@@ -107,11 +107,11 @@ export function checkElementGateway(id, element, component) {
     const propMemory = parseElmProps(id, element);
     const props = propMemory.props;
     try {
-        const { tagSupport } = tagElement(component, element, props[0]);
+        const { support } = tagElement(component, element, props[0]);
         propMemory.element = element;
-        propMemory.tag = tagSupport;
+        propMemory.tag = support;
         // watch element AND add to gateways[id].push()
-        return watchElement(id, element, tagSupport, component);
+        return watchElement(id, element, support, component);
     }
     catch (err) {
         console.warn('Failed to render component to element', {

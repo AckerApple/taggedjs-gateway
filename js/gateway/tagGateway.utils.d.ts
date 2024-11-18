@@ -1,9 +1,9 @@
-import { Wrapper, TagComponent, TagSupport } from "taggedjs";
+import { Wrapper, AnySupport } from "taggedjs";
 import { TagGateway, TagGatewayComponent } from "./tagGateway.function.js";
 export declare const gateways: {
     [id: string]: {
         gates: Gateway[];
-        tagComponent: TagComponent;
+        tagComponent: TagGatewayComponent;
     };
 };
 export declare function checkAllGateways(): void;
@@ -15,7 +15,7 @@ export type EventData = {
 };
 export type Gateway = {
     id: string;
-    tag: TagSupport;
+    tag: AnySupport;
     observer: MutationObserver;
     element: HTMLElement;
     component: TagGatewayComponent;
