@@ -1,11 +1,10 @@
-import { TagComponent, TagComponentBase, TagSupport, renderTagSupport, setUse } from "taggedjs"
+import { TagComponent, AnySupport, TaggedFunction, ToTag, renderSupport, Wrapper, setUseMemory } from "taggedjs"
 import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
 import { parseElmProps } from "./parseProps.js"
-import { Wrapper } from "taggedjs/js/TemplaterResult.class.js"
 
 export const tagGateways: Record<string, TagGateway> = {}
 
-export type TagGatewayComponent = TagComponent | TagComponentBase<[props: unknown]>
+export type TagGatewayComponent = TagComponent | TaggedFunction<ToTag> // TagComponentBase<[props: unknown]>
 
 type SetProps = <T extends string>(
   key: T, // must be unique across entire app
@@ -17,7 +16,7 @@ export type TagGateway = {
 
   props: SetProps
 
-  updateTag: (tag: TagSupport, element: Element) => any
+  updateTag: (tag: AnySupport, element: Element) => any
 
   propMemory: {
     [key: string]: PropMemory
@@ -26,10 +25,10 @@ export type TagGateway = {
 
 export type PropMemory = {
   callCount: number
-  props: any
+  props: [Record<string, any>]
 
   element?: Element
-  tag?: TagSupport
+  tag?: AnySupport
 }
 
 export const tagGateway = function tagGateway(
@@ -97,7 +96,7 @@ export const tagGateway = function tagGateway(
 
       return key
     },
-    updateTag: (tag: TagSupport, element: Element) => {
+    updateTag: (tag: AnySupport, element: Element) => {
       updateFromTag(
         id,
         element,
@@ -139,32 +138,28 @@ function checkTagElements(
 function updateFromTag(
   id: string,
   targetNode: Element,
-  tag: TagSupport
+  tag: AnySupport
 ) {
-  const templater = tag.templater
-  const latestTag = tag.global.newest as TagSupport
-  // const prevProps = latestTag.tagSupport.templater.props
-  const prevProps = latestTag.propsConfig.latestCloned
+  const latestTag = tag.subject.global.newest as AnySupport
+  const prevProps = latestTag.propsConfig?.latest
   const propMemory = parseElmProps(id, targetNode)
-  const newProps = [propMemory.props]
+  const newProps = propMemory.props
 
   const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps)
-  // const isSameProps = deepEqual(oldProps, newProps) // dont have access to this
-  
+
   if(isSameProps) {
     return // no reason to update, same props
   }
   
-  // propsConfig.latest = newProps
   latestTag.templater.props = newProps
 
   // after the next tag currently being rendered, then redraw me
-  setUse.memory.tagClosed$.toCallback(() => {
-    const latestTag = tag.global.newest as TagSupport
-    const tagSupport = latestTag
+  setUseMemory.tagClosed$.toCallback(() => {
+    const latestTag = tag.subject.global.newest as AnySupport
+    const anySupport = latestTag
     
-    tagSupport.templater.props = newProps
+    anySupport.templater.props = newProps
     
-    renderTagSupport(tagSupport, false)  
+    renderSupport(anySupport)  
   })
 }

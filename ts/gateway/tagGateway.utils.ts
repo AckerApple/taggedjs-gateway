@@ -1,13 +1,12 @@
-import { TagComponent, tagElement, Tag, TagSupport } from "taggedjs"
+import { Wrapper, TagComponent, tagElement, AnySupport, TagWrapper, destroySupport } from "taggedjs"
 import { loadTagGateway } from "./loadTagGateway.function.js"
-import { PropMemory, TagGateway, TagGatewayComponent, tagGateways } from "./tagGateway.function.js"
+import { TagGateway, TagGatewayComponent, tagGateways } from "./tagGateway.function.js"
 import { parseElmProps } from "./parseProps.js"
-import { Wrapper } from "taggedjs/js/TemplaterResult.class.js"
 
 export const gateways: {
   [id: string]: {
     gates: Gateway[],
-    tagComponent: TagComponent
+    tagComponent: TagGatewayComponent,
   }
 } = {}
 
@@ -35,14 +34,16 @@ function checkGateway(gateway: Gateway) {
 export function destroyGateway(gateway: Gateway) {
   const {id, observer, tag} = gateway
   observer.disconnect()
-  tag.destroy()
+  destroySupport(tag, 0)
   delete gateways[id]
 }
 
 export function getTagId(
   component: Wrapper
 ) {
-  const fun = component.original || component
+  const tag = component as any as TagWrapper<any>
+  const original = tag.original // || component.parentWrap?.original
+  const fun = original || component
   const componentString = functionToHtmlId(fun)
   return '__tagTemplate_' + componentString
 }
@@ -51,7 +52,7 @@ export function getTagId(
 function watchElement(
   id: string, // tag id
   targetNode: HTMLElement,
-  tag: TagSupport,
+  tag: AnySupport,
   component: TagGatewayComponent,
 ): Gateway {
   const tagGateway = tagGateways[id]
@@ -117,8 +118,8 @@ export type EventData = {
   detail: Record<string, any>
 }
 export type Gateway = {
-  id:string
-  tag:TagSupport
+  id: string
+  tag: AnySupport
   observer: MutationObserver
   element: HTMLElement
   component: TagGatewayComponent // TagComponent
@@ -170,22 +171,22 @@ export function checkElementGateway(
   const props = propMemory.props
 
   try {
-    const { tagSupport } = tagElement(
+    const { support } = tagElement(
       component as TagComponent,
       element,
-      props
+      props[0]
     )
 
     propMemory.element = element
-    propMemory.tag = tagSupport
+    propMemory.tag = support
     
     // watch element AND add to gateways[id].push()
-    return watchElement(id, element as HTMLElement, tagSupport, component)
+    return watchElement(id, element as HTMLElement, support, component)
   } catch (err) {
     console.warn('Failed to render component to element', {
       component,
       element,
-      props,
+      props: props[0],
       err,
     })
     throw err

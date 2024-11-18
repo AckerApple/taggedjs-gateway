@@ -1,12 +1,12 @@
-import { Tag, TagChildrenInput, TagComponent } from "taggedjs"
+import { Wrapper, Tag, TagChildrenInput, TagComponent } from "taggedjs"
 import { initWebComponents } from "./gateway.web.component.js"
 import { gateways, getTagId } from "./tagGateway.utils.js"
-import { Wrapper } from "taggedjs/js/TemplaterResult.class.js"
+import { TagGatewayComponent } from "./tagGateway.function.js"
 
 let hasInitWebComponents = false
 
 export function loadTagGateway(
-  component: TagComponent | ((props?: any, children?: TagChildrenInput) => Tag)
+  component: TagGatewayComponent, // TagComponent | ((props?: any, children?: TagChildrenInput) => Tag)
 ) {
   if(!hasInitWebComponents) {
     try {

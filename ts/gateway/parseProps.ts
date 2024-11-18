@@ -44,21 +44,21 @@ export function parseElmProps(
 
   delete props.tag
 
-  parseElmOutputs(element, props)
+  parseElmOutputs(element, [props])
   return {
-    props, callCount: 0,
+    props: [props], callCount: 0,
   }
 }
 
 function parseElmOutputs(
   element: Element,
-  props: Record<string, any>,
+  props: [Record<string, any>],
 ) {
   // attribute eventProps as output bindings
   const eventPropsString = element.getAttribute('events')
   if(eventPropsString) {
     eventPropsString.split(',').map(x => x.trim()).map((name: string) => {
-      props[name] = (value: unknown) => dispatchEvent(name, {detail:{[name]: value}})
+      props[0][name] = (value: unknown) => dispatchEvent(name, {detail:{[name]: value}})
     })
   }
   
