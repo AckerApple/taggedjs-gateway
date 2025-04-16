@@ -20,7 +20,7 @@ function checkGateway(gateway) {
 export function destroyGateway(gateway) {
     const { id, observer, tag } = gateway;
     observer.disconnect();
-    destroySupport(tag, 0);
+    destroySupport(tag);
     delete gateways[id];
 }
 export function getTagId(component) {
