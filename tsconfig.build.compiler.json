@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["./node_modules/taggedjs/stringCastHtmlTaggedLoader/**/*"],
+  "compilerOptions": {
+    "sourceRoot": "./stringCastHtmlTaggedLoader",
+    "outDir": "./assets/stringCastHtmlTaggedLoader",
+    "declaration": true,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  }
+}

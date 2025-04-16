@@ -1,3 +1,1 @@
-export declare const App: (() => import("taggedjs").Tag) & {
-    original: Function;
-};
+export declare const App: import("taggedjs").TaggedFunction<() => import("taggedjs").StringTag>;

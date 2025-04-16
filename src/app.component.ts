@@ -1,13 +1,19 @@
-import { html, tag, letState, onInit } from "taggedjs"
+import { html, tag, states, onInit } from "taggedjs"
 import { runTests } from "./tests.js"
 import { renderCountDiv } from "./renderCount.component.js"
 import { gatewayDebug } from "./gatewayDebug.component.js"
 
 export const App = tag(() => {
-  let _firstState = letState('app first state')(x => [_firstState, _firstState=x])
-  let toggleValue = letState(false)(x => [toggleValue, toggleValue=x])
-  let appCounter = letState(0)(x => [appCounter, appCounter=x])
-  let renderCount = letState(0)(x => [renderCount, renderCount=x])
+  let _firstState = 'app first state'
+  let toggleValue = false
+  let appCounter = 0
+  let renderCount = 0
+
+  states(get => [{
+    _firstState,toggleValue,appCounter, renderCount
+  }] = get({
+    _firstState,toggleValue,appCounter, renderCount
+  }))
 
   const toggle = () => {
     toggleValue = !toggleValue

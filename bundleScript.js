@@ -1,26 +1,28 @@
-// bundleScript.js
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.config.js');
-
-// Create a compiler instance with the configuration
-const compiler = webpack(webpackConfig);
-
-module.exports.run = () => {
-  return new Promise((res, rej) => {
-    compiler.run((err, stats) => {
-      if (err) {
-        console.error('build error', error)
-        return rej(err)
-      }
-
-      const errors = stats.compilation.compiler._lastCompilation.errors
-      if(errors && errors.length) {
-        return rej(errors[0].message)
-      }
-
-      res(stats)
-      // console.log('build done 22', )
-      // console.log('build done', stats)
-    })
-  })
-}
+export const run = (compiler) => {
+    console.debug('🌎📦 bundling...');
+    return new Promise((res, rej) => {
+        compiler.run((err, stats) => {
+            if (err) {
+                console.error('🌎📦 🔴 bundle error', {
+                    keys: Object.keys(err),
+                    details: err.details,
+                    err
+                });
+                return rej({});
+            }
+            const compilation = stats?.compilation;
+            if (compilation.errors.length) {
+                const error = compilation.errors[0];
+                const errors = error.module?._errors || (error.module?.getErrors?.());
+                console.error('🌎📦 🔴 compilation bundle error', error.message, errors);
+                return rej({} /*error*/);
+            }
+            res(stats);
+            const assets = compilation.assets;
+            console.debug('🌎📦 ✅ bundled sizes in kilobytes', Object.entries(assets).reduce((all, [name, value]) => {
+                all[name] = value.size() / 1000;
+                return all;
+            }, {}));
+        });
+    });
+};

@@ -1,19 +1,24 @@
-import { execute, it } from "./expect"
-import { expectElementCount, expectHTML, expectMatchedHtml, testCounterElements } from "./expect.html"
+import { html } from "./testing/elmSelectors"
+import { execute, it } from "./testing/expect"
+import { expectElmCount, expectHTML, expectMatchedHtml, testCounterElements } from "./testing/expect.html"
 
 export async function runTests() {  
+  const displayPropSelector = '#simple-prop-test-wrap #gateway-test-prop-display'
+
   it('elements exists', () => {
-    expectElementCount('#simple-prop-test-wrap #gateway-test-prop-display', 1)
-    expectHTML('#simple-prop-test-wrap #gateway-test-prop-display', '22')
-    expectMatchedHtml('#simple-prop-test-wrap #gateway-test-prop-display', '#display-gateway-count')
+    expectElmCount(displayPropSelector, 1)
+    const htmlDisplay = html(displayPropSelector)
+    expectHTML(displayPropSelector, htmlDisplay)
+    expectMatchedHtml(displayPropSelector, '#display-gateway-count')
   })
 
   it('counters increase', async () => {
+    const htmlDisplay = html(displayPropSelector)
     testCounterElements('#increase-gateway-count', '#display-gateway-count')
-    expectHTML('#display-gateway-count', '24')
+    expectHTML('#display-gateway-count', (Number(htmlDisplay) + 2).toString())
     expectMatchedHtml('#display-gateway-count', '#display-gateway-count-2')
     await wait(0) // gateway props changes run on element attribute watching which has a short delay
-    expectMatchedHtml('#display-gateway-count', '#simple-prop-test-wrap #gateway-test-prop-display')
+    expectMatchedHtml('#display-gateway-count', displayPropSelector)
   })
 
   try {

@@ -1,3 +1,1 @@
-export declare const gatewayDebug: (() => import("taggedjs").Tag) & {
-    original: Function;
-};
+export declare const gatewayDebug: import("taggedjs").TaggedFunction<() => import("taggedjs").StringTag>;

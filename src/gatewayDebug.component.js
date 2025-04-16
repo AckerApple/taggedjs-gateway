@@ -1,25 +1,17 @@
-import { tagGateway } from "taggedjs-gateway"
-import { GatewayTest } from "./GatewayTest.js"
-import { renderCountDiv } from "./renderCount.component.js"
-import { states, html, tag, state } from "taggedjs"
-
+import { tagGateway } from "taggedjs-gateway";
+import { GatewayTest } from "./GatewayTest.js";
+import { renderCountDiv } from "./renderCount.component.js";
+import { letState, html, tag, state } from "taggedjs";
 export const gatewayDebug = tag(() => {
-  let renderCount: number = 0
-  
-  states(get => [renderCount] = get(renderCount))
-
-  const gatewayData = state({
-    test: 22,
-    testString: 'see foam',
-  })
-
-  ++renderCount
-
-  const gateway = tagGateway(GatewayTest)
-
-  console.log('gatewayData', gatewayData)
-
-  return html`
+    let renderCount = letState(0)(x => [renderCount, renderCount = x]);
+    const gatewayData = state({
+        test: 22,
+        testString: 'see foam',
+    });
+    ++renderCount;
+    const gateway = tagGateway(GatewayTest);
+    console.log('gatewayData', gatewayData);
+    return html `
     hello world
     <!-- each prop as attr -->
     <div id="simple-prop-test-wrap">
@@ -40,7 +32,7 @@ export const gatewayDebug = tag(() => {
     </div>
 
     <!-- output events -->
-    ${/*
+    ${ /*
     <div
       tag=${gateway.id}
       [attr.test]="gatewayData.test"
@@ -56,6 +48,6 @@ export const gatewayDebug = tag(() => {
     <span id="display-gateway-count">${gatewayData.test}</span>
     <span id="display-gateway-count-2">${gatewayData.test}</span>
     
-    ${renderCountDiv({renderCount, name: 'gatewayDebug.component.ts'})}
-  `
-})
+    ${renderCountDiv({ renderCount, name: 'gatewayDebug.component.ts' })}
+  `;
+});

@@ -28,4 +28,3 @@ function wait(time) {
         setTimeout(res, time);
     });
 }
-//# sourceMappingURL=tests.js.map

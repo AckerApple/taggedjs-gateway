@@ -4,7 +4,7 @@ let tests: Test[] = []
 let tab = 0
 
 export function describe(label: string, run: () => any) {
-  tests.push(() => {
+  tests.push(async function itTest() {
     const oldTests = tests
     tests = []
     
@@ -12,8 +12,8 @@ export function describe(label: string, run: () => any) {
       console.debug('  '.repeat(tab) + '↘ ' + label)
       
       ++tab
-      run()
-      runTests(tests)
+      await run()
+      await runTests(tests)
       
       --tab
     } catch (error) {
@@ -26,8 +26,12 @@ export function describe(label: string, run: () => any) {
   })
 }
 
-describe.only = (label: string, run: () => any) => {
-  onlyTests.push(() => {
+describe.skip = function skip(label: string, run: () => any) {
+  console.debug('⏭️ Skipped ' + label)
+}
+
+describe.only = function only(label: string, run: () => any) {
+  onlyTests.push(async () => {
     const oldTests = tests
     tests = []
     
@@ -36,8 +40,8 @@ describe.only = (label: string, run: () => any) => {
       
       ++tab
       
-      run()
-      runTests(tests)
+      await run()
+      await runTests(tests)
       
       --tab
     } catch (error) {
@@ -51,10 +55,12 @@ describe.only = (label: string, run: () => any) => {
 }
 
 export function it(label: string, run: () => any) {
-  tests.push(async () => {
+  tests.push(async function pushIt() {
     try {
+      const start = Date.now()
       await run()
-      console.debug(' '.repeat(tab) + '✅ ' + label)
+      const time = Date.now() - start
+      console.debug(' '.repeat(tab) + `✅ ${label} - ${time}ms`)
     } catch (error) {
       console.debug(' '.repeat(tab) + '❌ ' + label)
       throw error
@@ -63,10 +69,12 @@ export function it(label: string, run: () => any) {
 }
 
 it.only = (label: string, run: () => any) => {
-  onlyTests.push(async () => {
+  onlyTests.push(async function pushOnlyTest() {
     try {
+      const start = Date.now()
       await run()
-      console.debug('✅ ' + label)
+      const time = Date.now() - start
+      console.debug(`✅ ${label} - ${time}ms`)
     } catch (error) {
       console.debug('❌ ' + label)
       throw error
@@ -74,56 +82,82 @@ it.only = (label: string, run: () => any) => {
   })
 }
 
-it.skip = (label: string, run: () => any) => {
+it.skip = function skip(label: string, run: () => any) {
   console.debug('⏭️ Skipped ' + label)
 }
 
-export function execute() {
+function clearTests() {
+  onlyTests.length = 0
+  tests.length = 0
+}
+
+export async function execute() {
   if(onlyTests.length) {
+    console.log('🏃 Running only mode...')
     return runTests(onlyTests)
   }
   
   return runTests(tests)
 }
 
-function runTests(tests: Test[]) {
-  return Promise.all(tests.map(test => {    
+async function runTests(tests: Test[]) {
+  for (const test of tests) {
     try {
-      return test()
+      await test()
     } catch (err) {
       console.error(`Error testing ${test.name}`)
+      clearTests()
       throw err
     }
-  }))
+  }
+  clearTests()
 }
 
 export function expect(expected: unknown) {
   return {
-    toBeDefined: () => {
+    toBeDefined: function toBeDefined(customMessage?: string | Function) {
       if(expected !== undefined && expected !== null) {
         return
       }
 
-      const message = `Expected ${JSON.stringify(expected)} to be defined`
+      if(customMessage instanceof Function) {
+        customMessage = customMessage()
+      }
+
+      const message = customMessage || `Expected ${JSON.stringify(expected)} to be defined`
       console.error(message, {expected})
-      throw new Error(message)
+      throw new Error(message as string)
     },
-    toBe: (received: unknown, customMessage?: string) => {
+    toBe: function toBe(received: unknown, customMessage?: string | Function) {
       if(expected === received) {
         return
       }
 
+      if(customMessage instanceof Function) {
+        customMessage = customMessage()
+      }
+
       const message = customMessage || `Expected ${typeof(expected)} ${JSON.stringify(expected)} to be ${typeof(received)} ${JSON.stringify(received)}`
-      console.error(message, {received, expected})
-      throw new Error(message)
+      console.error(message, {toBe: received, expected})
+      throw new Error(message as string)
     },
-    toBeGreaterThan: (amount: number, customMessage?: string) => {
+    toBeGreaterThan: function toBeGreaterThan(amount: number, customMessage?: string) {
       const expectNum = expected as number
       if(!isNaN(expectNum) && expectNum > amount) {
         return
       }
 
       const message = customMessage || `Expected ${typeof(expected)} ${JSON.stringify(expected)} to be greater than amount`
+      console.error(message, {amount, expected})
+      throw new Error(message)
+    },
+    toBeLessThan: function toBeLessThan(amount: number, customMessage?: string) {
+      const expectNum = expected as number
+      if(!isNaN(expectNum) && expectNum < amount) {
+        return
+      }
+
+      const message = customMessage || `Expected ${typeof(expected)} ${JSON.stringify(expected)} to be less than amount`
       console.error(message, {amount, expected})
       throw new Error(message)
     }

@@ -1,18 +1,38 @@
 {
+  "extends": "ts-node/node16/tsconfig.json",
+  "ts-node": {
+    "esm": true,
+    // It is faster to skip typechecking.
+    // Remove if you want ts-node to do typechecking.
+    "transpileOnly": true,
+    "experimentalSpecifierResolution": "node"
+  },
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "declaration": true,
-    "sourceMap": true,
-    "outDir": "./assets/js",
-    "rootDir": "./src/.",
+    "baseUrl": ".",
+    // "target": "es2020",
+    // "target": "ES5",
+    "module": "esnext",
     "removeComments": false,
     "strict": true,
-    "moduleResolution": "node",
+    "lib": [
+			"DOM",
+			"DOM.Iterable",
+			"esnext"
+		],
+    "allowSyntheticDefaultImports": true,
+    // "moduleResolution": "Node16",
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
+    "forceConsistentCasingInFileNames": true,
+
+    "allowJs": false,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "incremental": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
 }
