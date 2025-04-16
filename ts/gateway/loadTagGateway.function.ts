@@ -1,4 +1,4 @@
-import { Wrapper, Tag, TagChildrenInput, TagComponent } from "taggedjs"
+import { Wrapper } from "taggedjs"
 import { initWebComponents } from "./gateway.web.component.js"
 import { gateways, getTagId } from "./tagGateway.utils.js"
 import { TagGatewayComponent } from "./tagGateway.function.js"

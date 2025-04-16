@@ -34,7 +34,7 @@ function checkGateway(gateway: Gateway) {
 export function destroyGateway(gateway: Gateway) {
   const {id, observer, tag} = gateway
   observer.disconnect()
-  destroySupport(tag, 0)
+  destroySupport(tag)
   delete gateways[id]
 }
 
@@ -178,10 +178,15 @@ export function checkElementGateway(
     )
 
     propMemory.element = element
-    propMemory.tag = support
+    propMemory.tag = support as AnySupport
     
     // watch element AND add to gateways[id].push()
-    return watchElement(id, element as HTMLElement, support, component)
+    return watchElement(
+      id,
+      element as HTMLElement,
+      support as AnySupport,
+      component,
+    )
   } catch (err) {
     console.warn('Failed to render component to element', {
       component,
