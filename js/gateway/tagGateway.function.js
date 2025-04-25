@@ -1,7 +1,7 @@
-import { renderSupport, setUseMemory } from "taggedjs";
-import { checkElementGateway, getTagId } from "./tagGateway.utils.js";
-import { parseElmProps } from "./parseProps.js";
-export const tagGateways = {};
+import { getTagId } from "./tagGateway.utils.js";
+import { updateFromTag } from "./updateFromTag.function.js";
+import { tagGateways } from "./globals.js";
+import { checkElementGateway } from "./checkElementGateway.function.js";
 export const tagGateway = function tagGateway(component) {
     const id = getTagId(component);
     if (tagGateways[id]) {
@@ -33,21 +33,11 @@ export const tagGateway = function tagGateway(component) {
         }, interval);
     }
     const gateway = {
-        id,
+        id, component,
+        gates: [],
         propMemory: {},
         props: (key, props) => {
-            const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
-                props: [props],
-                callCount: 0,
-            };
-            memory.props = [props];
-            ++memory.callCount;
-            // new props given after init will be analyzed to trigger new render
-            const { element, tag } = memory;
-            if (element && tag) {
-                gateway.updateTag(tag, element);
-            }
-            return key;
+            return updateTagProps(gateway, key, [props]);
         },
         updateTag: (tag, element) => {
             updateFromTag(id, element, tag);
@@ -61,6 +51,21 @@ export const tagGateway = function tagGateway(component) {
     tagGateways[id] = gateway;
     return tagGateways[id];
 };
+export function updateTagProps(gateway, key, props) {
+    const propMem = gateway.propMemory;
+    const memory = propMem[key] = propMem[key] || {
+        props,
+        callCount: 0,
+    };
+    memory.props = props;
+    ++memory.callCount;
+    // new props given after init will be analyzed to trigger new render (set by checkElementGateway)
+    const { element, tag } = memory;
+    if (element && tag) {
+        gateway.updateTag(tag, element);
+    }
+    return key;
+}
 function checkTagElementsById(id, component) {
     const elements = document.querySelectorAll(`[tag="${id}"]`);
     return checkTagElements(id, elements, component);
@@ -68,23 +73,5 @@ function checkTagElementsById(id, component) {
 function checkTagElements(id, elements, component) {
     elements.forEach(element => checkElementGateway(id, element, component));
     return elements;
-}
-function updateFromTag(id, targetNode, tag) {
-    const latestTag = tag.subject.global.newest;
-    const prevProps = latestTag.propsConfig?.latest;
-    const propMemory = parseElmProps(id, targetNode);
-    const newProps = propMemory.props;
-    const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps);
-    if (isSameProps) {
-        return; // no reason to update, same props
-    }
-    latestTag.templater.props = newProps;
-    // after the next tag currently being rendered, then redraw me
-    setUseMemory.tagClosed$.toCallback(() => {
-        const latestTag = tag.subject.global.newest;
-        const anySupport = latestTag;
-        anySupport.templater.props = newProps;
-        renderSupport(anySupport);
-    });
 }
 //# sourceMappingURL=tagGateway.function.js.map

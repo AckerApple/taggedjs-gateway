@@ -21,8 +21,13 @@ const yourTagComponent = tag(({someNumber, another}) => {
 @Component({
   selector: 'dump',
   template: `
-    <!-- simple variable props only -->
-    <div [attr.tag:id]="yourTag.id"
+    <!-- new -->
+    <div [attr.tag]="yourTag.id"
+      [attr.props]="yourTag.props('unique-id', {someNumber: value, another:variable})"
+    ></div>
+
+<!-- simple variable props only -->
+    <div [attr.tag]="yourTag.id"
       [attr.someNumber]="value"
       [attr.another]="variable"
     ></div>
@@ -35,7 +40,7 @@ const yourTagComponent = tag(({someNumber, another}) => {
     ></div>
   `,
 }) export class DumpComponent {
-  yourTagId = loadTagGateway( yourTagComponent )
+  yourTag = loadTagGateway( yourTagComponent )
   
   // props
   value = 22

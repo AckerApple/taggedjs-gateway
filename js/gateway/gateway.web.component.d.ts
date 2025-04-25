@@ -4,6 +4,7 @@ import { Gateway } from "./tagGateway.utils.js";
  */
 export declare class TagElement extends HTMLElement {
     gateway: Gateway;
+    gatewayPromise: Promise<void>;
     constructor();
     disconnectedCallback(): void;
 }

@@ -1,8 +1,7 @@
-import { tagElement, destroySupport } from "taggedjs";
+import { destroySupport } from "taggedjs";
 import { loadTagGateway } from "./loadTagGateway.function.js";
-import { tagGateways } from "./tagGateway.function.js";
-import { parseElmProps } from "./parseProps.js";
-export const gateways = {};
+import { gateways, tagGateways } from "./globals.js";
+import { checkElementGateway } from "./checkElementGateway.function.js";
 export function checkAllGateways() {
     Object.entries(gateways).forEach(([id, gateways]) => checkGateways(gateways.gates));
 }
@@ -20,7 +19,7 @@ function checkGateway(gateway) {
 export function destroyGateway(gateway) {
     const { id, observer, tag } = gateway;
     observer.disconnect();
-    destroySupport(tag);
+    destroySupport(tag, tag.subject.global);
     delete gateways[id];
 }
 export function getTagId(component) {
@@ -31,7 +30,7 @@ export function getTagId(component) {
     return '__tagTemplate_' + componentString;
 }
 /** adds to gateways[id].push */
-function watchElement(id, // tag id
+export function watchElement(id, // tag id
 targetNode, tag, component) {
     const tagGateway = tagGateways[id];
     const observer = new MutationObserver(mutationsList => {
@@ -47,7 +46,7 @@ targetNode, tag, component) {
     function updateTag() {
         tagGateway.updateTag(tag, targetNode);
     }
-    loadTagGateway(component);
+    loadTagGateway(component, getTagId(component));
     const gateway = {
         id, tag,
         observer,
@@ -56,8 +55,7 @@ targetNode, tag, component) {
         updateTag,
         tagGateway,
     };
-    gateways[id] = gateways[id] || [];
-    gateways[id].gates.push(gateway);
+    tagGateway.gates.push(gateway);
     targetNode.gateway = gateway;
     // Configure the observer to watch for changes in child nodes and attributes
     const config = { attributes: true };
@@ -90,37 +88,12 @@ export function checkByElement(element) {
         console.warn(message, { tagName, element });
         throw new Error(message);
     }
-    const component = gateways[tagName].tagComponent;
+    const component = tagGateways[tagName]?.component || gateways[tagName]?.tagComponent;
     if (!component) {
         const message = `Cannot find a tag registered by id of ${tagName}`;
         console.warn(message, { tagName, element });
         throw new Error(message);
     }
     return checkElementGateway(tagName, element, component);
-}
-export function checkElementGateway(id, element, component) {
-    const gateway = element.gateway;
-    if (gateway) {
-        gateway.updateTag();
-        return gateway;
-    }
-    const propMemory = parseElmProps(id, element);
-    const props = propMemory.props;
-    try {
-        const { support } = tagElement(component, element, props[0]);
-        propMemory.element = element;
-        propMemory.tag = support;
-        // watch element AND add to gateways[id].push()
-        return watchElement(id, element, support, component);
-    }
-    catch (err) {
-        console.warn('Failed to render component to element', {
-            component,
-            element,
-            props: props[0],
-            err,
-        });
-        throw err;
-    }
 }
 //# sourceMappingURL=tagGateway.utils.js.map

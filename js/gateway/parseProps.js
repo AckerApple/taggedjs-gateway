@@ -1,11 +1,11 @@
-import { tagGateways } from "./tagGateway.function.js";
+import { tagGateways } from "./globals.js";
 export function parseElmProps(id, // element.id
 element) {
     const propsId = element.getAttribute('props');
     if (propsId) {
-        const elmGateway = element.gateway;
-        const gateway = tagGateways[id] || elmGateway.tagGateway;
-        const propMemory = gateway.propMemory[propsId];
+        // const elmGateway = (element as any).gateway as Gateway
+        const tagGateway = tagGateways[id]; // || gateway.tagGateway
+        const propMemory = tagGateway.propMemory[propsId];
         parseElmOutputs(element, propMemory.props);
         return propMemory;
     }
