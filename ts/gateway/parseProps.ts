@@ -1,15 +1,17 @@
-import { PropMemory, tagGateways } from "./tagGateway.function.js"
-import { EventData, Gateway } from "./tagGateway.utils.js"
+import { tagGateways } from "./globals.js"
+import { GatewayProps, PropMemory } from "./tagGateway.function.js"
+import { EventData } from "./tagGateway.utils.js"
 
 export function parseElmProps(
   id: string, // element.id
   element: Element,
+  // gateway: Gateway,
 ): PropMemory {
   const propsId = element.getAttribute('props')
   if( propsId ) {
-    const elmGateway = (element as any).gateway as Gateway
-    const gateway = tagGateways[ id ] || elmGateway.tagGateway
-    const propMemory = gateway.propMemory[ propsId ]
+    // const elmGateway = (element as any).gateway as Gateway
+    const tagGateway = tagGateways[ id ] // || gateway.tagGateway
+    const propMemory = tagGateway.propMemory[ propsId ]
     parseElmOutputs(element, propMemory.props)
     return propMemory
   }
@@ -52,7 +54,7 @@ export function parseElmProps(
 
 function parseElmOutputs(
   element: Element,
-  props: [Record<string, any>],
+  props: GatewayProps,
 ) {
   // attribute eventProps as output bindings
   const eventPropsString = element.getAttribute('events')

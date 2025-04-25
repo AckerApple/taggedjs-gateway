@@ -1,4 +1,7 @@
 ### TODO NOW: Before Mega-aide
+
+- Prevent attribute parsing failure on (click)=""
+
 - HTML Tables
 - routing
 - Upgrade state to support both named and array state memory

@@ -1,18 +1,23 @@
 import { TagComponent, AnySupport, TaggedFunction, ToTag, renderSupport, Wrapper, setUseMemory } from "taggedjs"
-import { checkElementGateway, getTagId } from "./tagGateway.utils.js"
-import { parseElmProps } from "./parseProps.js"
-
-export const tagGateways: Record<string, TagGateway> = {}
+import { Gateway, getTagId } from "./tagGateway.utils.js"
+import { updateFromTag } from "./updateFromTag.function.js"
+import { tagGateways } from "./globals.js"
+import { checkElementGateway } from "./checkElementGateway.function.js"
 
 export type TagGatewayComponent = TagComponent | TaggedFunction<ToTag> // TagComponentBase<[props: unknown]>
 
+/** key must be unique across entire app */
 type SetProps = <T extends string>(
   key: T, // must be unique across entire app
   props: any,
 ) => T
 
 export type TagGateway = {
+  component: TagGatewayComponent
   id: string
+  
+  /** TODO: do we really need this */
+  gates: Gateway[]
 
   props: SetProps
 
@@ -25,7 +30,9 @@ export type TagGateway = {
 
 export type PropMemory = {
   callCount: number
-  props: [Record<string, any>]
+  
+  // props: unknown[]
+  props: GatewayProps // one item in array
 
   element?: Element
   tag?: AnySupport
@@ -74,27 +81,16 @@ export const tagGateway = function tagGateway(
   }
 
   const gateway: TagGateway = {
-    id,
+    id, component,
+    
+    gates: [],
     propMemory: {},
+    
     props: (
       key,
       props,
     ) => {
-      const memory = gateway.propMemory[key] = gateway.propMemory[key] || {
-        props: [props],
-        callCount: 0,
-      }
-
-      memory.props = [props]
-      ++memory.callCount
-
-      // new props given after init will be analyzed to trigger new render
-      const {element, tag} = memory
-      if(element && tag) {
-        gateway.updateTag(tag, element)
-      }
-
-      return key
+      return updateTagProps(gateway, key, [props])
     },
     updateTag: (tag: AnySupport, element: Element) => {
       updateFromTag(
@@ -117,6 +113,29 @@ export const tagGateway = function tagGateway(
   return tagGateways[id]
 }
 
+export function updateTagProps<T extends string>(
+  gateway: TagGateway,
+  key: T,
+  props: GatewayProps,
+): T {
+  const propMem = gateway.propMemory
+  const memory = propMem[key] = propMem[key] || {
+    props,
+    callCount: 0,
+  }
+
+  memory.props = props
+  ++memory.callCount
+
+  // new props given after init will be analyzed to trigger new render (set by checkElementGateway)
+  const { element, tag } = memory
+  if (element && tag) {
+    gateway.updateTag(tag, element)
+  }
+
+  return key
+}
+
 function checkTagElementsById(
   id: string,
   component: TagGatewayComponent,
@@ -135,31 +154,4 @@ function checkTagElements(
   return elements
 }
 
-function updateFromTag(
-  id: string,
-  targetNode: Element,
-  tag: AnySupport
-) {
-  const latestTag = tag.subject.global.newest as AnySupport
-  const prevProps = latestTag.propsConfig?.latest
-  const propMemory = parseElmProps(id, targetNode)
-  const newProps = propMemory.props
-
-  const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps)
-
-  if(isSameProps) {
-    return // no reason to update, same props
-  }
-  
-  latestTag.templater.props = newProps
-
-  // after the next tag currently being rendered, then redraw me
-  setUseMemory.tagClosed$.toCallback(() => {
-    const latestTag = tag.subject.global.newest as AnySupport
-    const anySupport = latestTag
-    
-    anySupport.templater.props = newProps
-    
-    renderSupport(anySupport)  
-  })
-}
+export type GatewayProps = [Record<string, unknown>]
