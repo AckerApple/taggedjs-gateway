@@ -28,7 +28,7 @@ function checkGateway(gateway: Gateway) {
 export function destroyGateway(gateway: Gateway) {
   const {id, observer, tag} = gateway
   observer.disconnect()
-  destroySupport(tag, tag.subject.global)
+  destroySupport(tag, tag.context.global)
   delete gateways[id]
 }
 

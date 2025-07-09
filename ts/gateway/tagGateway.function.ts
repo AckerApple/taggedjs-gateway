@@ -1,4 +1,4 @@
-import { TagComponent, AnySupport, TaggedFunction, ToTag, renderSupport, Wrapper, setUseMemory } from "taggedjs"
+import { TagComponent, AnySupport, TaggedFunction, ToTag, Wrapper } from "taggedjs"
 import { Gateway, getTagId } from "./tagGateway.utils.js"
 import { updateFromTag } from "./updateFromTag.function.js"
 import { tagGateways } from "./globals.js"

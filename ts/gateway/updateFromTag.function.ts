@@ -6,7 +6,7 @@ export function updateFromTag(
   targetNode: Element,
   tag: AnySupport
 ) {
-  const latestTag = tag.subject.global.newest as AnySupport
+  const latestTag = tag.context.global.newest as AnySupport
   const prevProps = latestTag.propsConfig?.latest as any
   // const gateway = (targetNode as any).gateway
   const propMemory = parseElmProps(id, targetNode)
@@ -23,7 +23,7 @@ export function updateFromTag(
 
   // after the next tag currently being rendered, then redraw me
   setUseMemory.tagClosed$.toCallback(() => {
-    const latestTag = tag.subject.global.newest as AnySupport
+    const latestTag = tag.context.global.newest as AnySupport
     const anySupport = latestTag    
     anySupport.templater.props = newProps
     
