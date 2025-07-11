@@ -1,4 +1,4 @@
-import { tagGateways } from "./globals.js"
+import { tagGatewayMemory, tagGateways } from "./globals.js"
 import { GatewayProps, PropMemory } from "./tagGateway.function.js"
 import { EventData } from "./tagGateway.utils.js"
 
@@ -11,6 +11,18 @@ export function parseElmProps(
   if( propsId ) {
     // const elmGateway = (element as any).gateway as Gateway
     const tagGateway = tagGateways[ id ] // || gateway.tagGateway
+
+    if(!tagGateway) {
+      const message = `Cannot find tag gateway by id ${propsId}`
+      console.warn(message, {
+        fullId: id,
+        propsId,
+        gatewayIds: Object.keys( tagGateways ),
+        tagGatewayMemory,
+      })
+      throw new Error(message)
+    }
+
     const propMemory = tagGateway.propMemory[ propsId ]
     parseElmOutputs(element, propMemory.props)
     return propMemory

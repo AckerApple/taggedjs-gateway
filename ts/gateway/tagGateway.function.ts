@@ -1,7 +1,7 @@
 import { TagComponent, AnySupport, TaggedFunction, ToTag, Wrapper } from "taggedjs"
 import { Gateway, getTagId } from "./tagGateway.utils.js"
 import { updateFromTag } from "./updateFromTag.function.js"
-import { tagGateways } from "./globals.js"
+import { tagGatewayMemory, tagGateways } from "./globals.js"
 import { checkElementGateway } from "./checkElementGateway.function.js"
 
 export type TagGatewayComponent = TagComponent | TaggedFunction<ToTag> // TagComponentBase<[props: unknown]>
@@ -62,7 +62,7 @@ export const tagGateway = function tagGateway(
     if(intervalId) {
       clearInterval(intervalId)
     }
-    delete tagGateways[id]
+    // delete tagGateways[id]
 
     return elements.length
   }

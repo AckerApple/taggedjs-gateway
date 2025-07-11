@@ -12,13 +12,14 @@ export function updateFromTag(
   const propMemory = parseElmProps(id, targetNode)
   const newProps = propMemory.props
 
-  // const isSameProps = JSON.stringify(prevProps) === JSON.stringify(newProps) // BAD circular error
+  // 7-2025: always render updates (would need to clone props otherwise)
+  /*
   const isSameProps = hasPropChanges(newProps, prevProps, PropWatches.SHALLOW)
-
   if(isSameProps) {
     return // no reason to update, same props
   }
-  
+  */
+
   latestTag.templater.props = newProps
 
   // after the next tag currently being rendered, then redraw me
@@ -27,6 +28,6 @@ export function updateFromTag(
     const anySupport = latestTag    
     anySupport.templater.props = newProps
     
-    renderSupport(anySupport)  
+    renderSupport(anySupport)
   })
 }
