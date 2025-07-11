@@ -19,7 +19,7 @@ export const tagGateway = function tagGateway(component) {
         if (intervalId) {
             clearInterval(intervalId);
         }
-        delete tagGateways[id];
+        // delete tagGateways[id]
         return elements.length;
     }
     function findElement() {
