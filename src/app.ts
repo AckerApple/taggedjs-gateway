@@ -1,9 +1,9 @@
 import { tagElement } from "taggedjs"
 import { IsolatedApp } from "./isolatedApp.js"
-import { App } from "./app.component.js"
+import { App } from "./app.tag.js"
 
 const app = () => {// app.ts
-  console.info('attaching app to element...')
+  console.info('⏳ attaching app to element...')
   const element = document.getElementsByTagName('app')[0]
 
   const locationSplit = window.location.pathname.split('/').filter(x => x)
@@ -13,7 +13,6 @@ const app = () => {// app.ts
       return
   }
 
-  console.log('App',App)
   tagElement(App, element, {test:1})
 }
 

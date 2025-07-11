@@ -1,5 +1,5 @@
 import { html, state, tag } from "taggedjs"
-import { gatewayDebug } from "./gatewayDebug.component"
+import { gatewayDebug } from "./gatewayDebug.tag"
 
 export const IsolatedApp = tag(() => {
   const stateTest = state('isolated-app-state')  

@@ -1,7 +1,7 @@
 import { html, tag, states, onInit } from "taggedjs"
 import { runTests } from "./tests.js"
 import { renderCountDiv } from "./renderCount.component.js"
-import { gatewayDebug } from "./gatewayDebug.component.js"
+import { gatewayDebug } from "./gatewayDebug.tag.js"
 
 export const App = tag(() => {
   let _firstState = 'app first state'

@@ -30,8 +30,8 @@ export async function replaceTemplater(
 
   // loop all values looking for original functions that match oldTag to replace newTag with
   const promises = values.map(async (value: unknown, index) => {
-    const matchGlobal = ownerSupport.subject.global as SupportTagGlobal
-    const matchContext = matchGlobal.context as ContextItem[]
+    const matchGlobal = ownerSupport.context.global as SupportTagGlobal
+    const matchContext = matchGlobal.contexts
     const contextItem = matchContext[ index ]
     count = await checkToUpdateSubject(
       value,
@@ -48,11 +48,10 @@ export async function replaceTemplater(
   
   paint()
   hmr.paint()
-
   
   // loop children to process the context they have
-  const global = ownerSupport.subject.global as SupportTagGlobal
-  const context = global.context
+  const global = ownerSupport.context.global as SupportTagGlobal
+  const context = global.contexts
   const subPromises = context.map(async child => {
     const childGlobal = child.global as SupportTagGlobal
 

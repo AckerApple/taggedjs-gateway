@@ -10,7 +10,6 @@ export const gatewayDebug = tag(() => {
     });
     ++renderCount;
     const gateway = tagGateway(GatewayTest);
-    console.log('gatewayData', gatewayData);
     return html `
     hello world
     <!-- each prop as attr -->

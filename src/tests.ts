@@ -1,5 +1,5 @@
-import { html } from "./testing/elmSelectors"
-import { execute, it } from "./testing/expect"
+import { click, html } from "./testing/elmSelectors"
+import { execute, expect, it } from "./testing/expect"
 import { expectElmCount, expectHTML, expectMatchedHtml, testCounterElements } from "./testing/expect.html"
 
 export async function runTests() {  
@@ -19,6 +19,32 @@ export async function runTests() {
     expectMatchedHtml('#display-gateway-count', '#display-gateway-count-2')
     await wait(0) // gateway props changes run on element attribute watching which has a short delay
     expectMatchedHtml('#display-gateway-count', displayPropSelector)
+  })
+
+  it('props-test-wrap', () => {
+    const displayPropSelector = '#props-test-wrap #gateway-test-prop-display'
+    expectElmCount(displayPropSelector, 1)
+
+    const htmlDisplay = html(displayPropSelector)
+    expectHTML(displayPropSelector, htmlDisplay)
+    expectMatchedHtml(displayPropSelector, '#display-gateway-count')
+
+    click('#increase-gateway-count')
+
+    expect(html(displayPropSelector)).toBe( (Number(htmlDisplay) + 1).toString() )
+  })
+
+  it('props-web-component-wrap', () => {
+    const displayPropSelector = '#props-web-component-wrap #gateway-test-prop-display'
+    expectElmCount(displayPropSelector, 1)
+
+    const htmlDisplay = html(displayPropSelector)
+    expectHTML(displayPropSelector, htmlDisplay)
+    expectMatchedHtml(displayPropSelector, '#display-gateway-count')
+
+    click('#increase-gateway-count')
+
+    expect(html(displayPropSelector)).toBe( (Number(htmlDisplay) + 1).toString() )
   })
 
   try {

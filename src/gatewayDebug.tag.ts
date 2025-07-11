@@ -17,8 +17,6 @@ export const gatewayDebug = tag(() => {
 
   const gateway = tagGateway(GatewayTest)
 
-  console.log('gatewayData', gatewayData)
-
   return html`
     hello world
     <!-- each prop as attr -->
@@ -31,6 +29,8 @@ export const gatewayDebug = tag(() => {
       ></div>
     </div>
 
+    <hr />
+
     <!-- props as one attr -->
     <div id="props-test-wrap">
       <div
@@ -38,6 +38,18 @@ export const gatewayDebug = tag(() => {
         props=${gateway.props('props-as-one-attr', gatewayData)}
       ></div>
     </div>
+
+    <hr />
+
+    <!-- web component -->
+    <div id="props-web-component-wrap">
+      <tag-element
+        tag=${gateway.id}
+        props=${gateway.props('inputMapsTagProps', gatewayData)}
+      ></tag-element>
+    </div>
+
+    <hr />
 
     <!-- output events -->
     ${/*
@@ -54,6 +66,7 @@ export const gatewayDebug = tag(() => {
     >increase ${gatewayData.test}</button>
     
     <span id="display-gateway-count">${gatewayData.test}</span>
+    |
     <span id="display-gateway-count-2">${gatewayData.test}</span>
     
     ${renderCountDiv({renderCount, name: 'gatewayDebug.component.ts'})}

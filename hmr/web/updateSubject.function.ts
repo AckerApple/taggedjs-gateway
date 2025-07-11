@@ -11,7 +11,7 @@
 import { LikeObjectChildren } from "taggedjs/js/interpolations/optimizers/LikeObjectElement.type.js"
 import { HmrImport } from "./hmr.js"
 import { switchAllProviderConstructors } from "./switchAllProviderConstructors.function"
-import { processSubUpdate, DomTag, StringTag, buildBeforeElement, ContextItem, destroySupport, paint, Support, SupportTagGlobal, TaggedFunction, isSubjectInstance, Wrapper, AnySupport, SupportContextItem, ValueTypes, Original } from "taggedjs"
+import { DomTag, StringTag, buildBeforeElement, ContextItem, destroySupport, paint, Support, SupportTagGlobal, TaggedFunction, Wrapper, AnySupport, SupportContextItem, Original } from "taggedjs"
 
 /** @typedef {{renderTagOnly: renderTagOnly, renderSupport: renderSupport, renderWithSupport: renderWithSupport}} HmrImport */
 
@@ -90,9 +90,11 @@ async function swapSupport(
   const prevConstructors = pros ? pros.map(provider => provider.constructMethod) : []
   const placeholder = contextSubject.placeholder
 
-  await destroySupport(oldest)
+  await destroySupport(oldest, global)
   const reGlobal = contextSubject.global as SupportTagGlobal
   delete reGlobal.deleted
+
+  // TODO: ISSUE I believe is here using the other context. Need to ensure handler and processors are NOT arrow functions
 
   const reSupport = hmr.renderTagOnly(
     newest,
@@ -103,7 +105,7 @@ async function swapSupport(
 
   const appSupport = oldest.appSupport
   const ownerSupport = oldest.ownerSupport as AnySupport
-  const ownGlobal = ownerSupport.subject.global as SupportTagGlobal
+  const ownGlobal = ownerSupport.context.global as SupportTagGlobal
   const providers = global.providers
   const owner = ownGlobal.oldest as Support
 
@@ -125,7 +127,7 @@ async function swapSupport(
     placeholder,
   )
 
-  recurseContext(global.context, reSupport)
+  recurseContext(global.contexts, reSupport)
 
   paint()
 
@@ -137,6 +139,7 @@ function recurseContext(
   context: SupportContextItem[],
   reSupport: AnySupport,
 ) {
+  /*
   switch (reSupport.templater.tagJsType[0]) {
     case ValueTypes.dom[0]:
       reSupport.templater.tagJsType = ValueTypes.dom
@@ -150,21 +153,14 @@ function recurseContext(
       reSupport.templater.tagJsType = ValueTypes.tagComponent
       break
   }
+  */
 
   context.forEach(contextItem => {
+    /*
     if(isSubjectInstance(contextItem.value)) {
       processSubUpdate(contextItem.value, contextItem, reSupport)
-      /*
-      processFirstSubjectValue(
-        contextItem.value,
-        contextItem,
-        reSupport,
-        {added:0, removed:0},
-        `rvp_-1_${reSupport.templater.tag?.values.length}`,
-        undefined // syncRun ? appendTo : undefined,
-      )
-      */
     }
+    */
     /*
     if(contextItem.subject) {
       processFirstSubjectValue(
@@ -181,7 +177,7 @@ function recurseContext(
     const nextGlobal = contextItem.global
 
     if(contextItem.global) {
-      const nextContext = nextGlobal?.context
+      const nextContext = nextGlobal?.contexts
       if(nextContext) {
         const nextSupport = nextGlobal.newest as AnySupport
         recurseContext(nextContext, nextSupport)

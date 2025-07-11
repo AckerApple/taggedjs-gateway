@@ -24,7 +24,7 @@
     "ws": "^8.15.1"
   },
   "dependencies": {
-    "taggedjs": "^2.8.17",
+    "taggedjs": "^2.8.43",
     "taggedjs-gateway": "^1.1.1"
   }
 }

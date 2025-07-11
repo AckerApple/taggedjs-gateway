@@ -413,12 +413,17 @@ function rebuildApps() {
   forEachApp(element => {
     discoverTags().then(apps => {
       apps.forEach(({newApp, tagName}) => {
+        console.log('🏷️ hmr app rebuilding...', { app: newApp, tagName })
+
         /** @type {{tagElement: tagElement}} */
         const { tagElement } = newApp.hmr
         if((element as any).destroy) {
+          return
+          console.debug('🗑️ destroying tag already on element', { element })
           const destroyRun = (element as any).destroy()
         }
         
+        console.debug('🥚 rebuilding tag on element', { element })
         const result = tagElement(newApp[tagName as string], element, {test:1})
         
         lastTags = result.tags
