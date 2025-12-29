@@ -1,4 +1,4 @@
-import { ValueTypes, ContextItem, paint, Tag, Support, TaggedFunction, SupportTagGlobal } from "taggedjs"
+import { ValueTypes, ContextItem, paint, Tag, Support, TaggedFunction, SupportTagGlobal, SupportContextItem } from "taggedjs"
 import { updateSubject } from "./updateSubject.function"
 import { HmrImport } from "./hmr"
 
@@ -30,8 +30,7 @@ export async function replaceTemplater(
 
   // loop all values looking for original functions that match oldTag to replace newTag with
   const promises = values.map(async (value: unknown, index) => {
-    const matchGlobal = ownerSupport.context.global as SupportTagGlobal
-    const matchContext = matchGlobal.contexts
+    const matchContext = ownerSupport.context.contexts
     const contextItem = matchContext[ index ]
     count = await checkToUpdateSubject(
       value,
@@ -50,8 +49,7 @@ export async function replaceTemplater(
   hmr.paint()
   
   // loop children to process the context they have
-  const global = ownerSupport.context.global as SupportTagGlobal
-  const context = global.contexts
+  const context = ownerSupport.context.contexts
   const subPromises = context.map(async child => {
     const childGlobal = child.global as SupportTagGlobal
 
@@ -59,7 +57,7 @@ export async function replaceTemplater(
       return
     }
 
-    const support = childGlobal.oldest as Support
+    const support = (child as SupportContextItem).state.oldest as Support
 
     if(support) {
       const newCount = await replaceTemplater(
@@ -70,11 +68,6 @@ export async function replaceTemplater(
 
       if(newCount > 0) {
         count = newCount + count
-        if(isApp && (oldTag.original as any)?.isApp) {
-          console.log('app templater just now replaced', {
-            count, newCount, newTag, oldTag,
-          })
-        }
       }
     }
   })
@@ -95,7 +88,6 @@ async function checkToUpdateSubject(
 ): Promise<number> {
   const tagJsType = value && value.tagJsType
   if(!tagJsType) {
-    // console.log('not a value for us?', {value})
     return count// not a tagJsType value
   }
 
@@ -112,7 +104,7 @@ async function checkToUpdateSubject(
     return count
   }
 
-  const oldest = (contextItem.global as SupportTagGlobal)?.oldest
+  const oldest = (contextItem as SupportContextItem).state?.oldest
   const newOriginal = oldest?.templater.wrapper?.original
   if(oldTag.original.toString() === newOriginal?.toString()) {
     oldTag.original = newOriginal

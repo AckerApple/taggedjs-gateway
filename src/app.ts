@@ -8,7 +8,6 @@ const app = () => {// app.ts
 
   const locationSplit = window.location.pathname.split('/').filter(x => x)
   if(['isolated.html','index-static.html'].includes(locationSplit[0].toLowerCase())) {
-      console.log('IsolatedApp',IsolatedApp)
       tagElement(IsolatedApp, element, {test:1})
       return
   }

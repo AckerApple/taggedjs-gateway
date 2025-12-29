@@ -11,7 +11,7 @@
 import { LikeObjectChildren } from "taggedjs/js/interpolations/optimizers/LikeObjectElement.type.js"
 import { HmrImport } from "./hmr.js"
 import { switchAllProviderConstructors } from "./switchAllProviderConstructors.function"
-import { DomTag, StringTag, buildBeforeElement, ContextItem, destroySupport, paint, Support, SupportTagGlobal, TaggedFunction, Wrapper, AnySupport, SupportContextItem, Original } from "taggedjs"
+import { DomTag, StringTag, buildBeforeElement, ContextItem, destroySupport, paint, Support, SupportTagGlobal, TaggedFunction, Wrapper, AnySupport, SupportContextItem, Original, ContextStateSupport } from "taggedjs"
 
 /** @typedef {{renderTagOnly: renderTagOnly, renderSupport: renderSupport, renderWithSupport: renderWithSupport}} HmrImport */
 
@@ -29,8 +29,8 @@ export async function updateSubject(
   hmr: HmrImport,
 ) {
   const global = contextSubject.global as SupportTagGlobal  
-  const oldest = global.oldest as Support
-  const newest = global.newest as Support
+  const oldest = (contextSubject as SupportContextItem).state.oldest as Support
+  const newest = (contextSubject as SupportContextItem).state.newest as Support
 
   const oldTemplater = oldest.templater
   const oldWrapper = oldTemplater.wrapper as Wrapper | undefined
@@ -53,40 +53,25 @@ export async function updateSubject(
       contextWrapper.original = newTag.original as Original
       
       const newWrapper = newest.templater.wrapper as Wrapper
-      newWrapper.original = newTag.original as Original
-      
-      const strings = (global.oldest.templater.tag as StringTag).strings
-      const dom = (global.oldest.templater.tag as DomTag).dom
-
-      if(original.toString().includes('sections') || strings?.includes('sections')) {
-        console.log('we are swapping sections......')
-      }
-    
-      if(dom && findText('sections', dom)) {
-        console.log('we found it!!!!')
-      }
-    
-      console.log('swapping supports-----', {
-        oldest,
-        state: oldest?.state
-      })    
+      newWrapper.original = newTag.original as Original      
     }
   }
 
   await swapSupport(
-    contextSubject, hmr,
+    contextSubject as SupportContextItem,
+    hmr,
   )
 }
 
 async function swapSupport(
-  contextSubject: ContextItem,
+  contextSubject: SupportContextItem,
   hmr: HmrImport,
 ) {
   const global = contextSubject.global as SupportTagGlobal  
-  const oldest = global.oldest as Support
-  const newest = global.newest as Support
+  const oldest = (contextSubject as SupportContextItem).state.oldest as Support
+  const newest = (contextSubject as SupportContextItem).state.newest as Support
 
-  const pros = global.providers
+  const pros = contextSubject.providers
   const prevConstructors = pros ? pros.map(provider => provider.constructMethod) : []
   const placeholder = contextSubject.placeholder
 
@@ -96,7 +81,8 @@ async function swapSupport(
 
   // TODO: ISSUE I believe is here using the other context. Need to ensure handler and processors are NOT arrow functions
 
-  const reSupport = hmr.renderTagOnly(
+  // const reSupport = hmr.reRenderTag(
+  const reSupport = hmr.firstTagRender(
     newest,
     newest,
     contextSubject as SupportContextItem,
@@ -105,9 +91,9 @@ async function swapSupport(
 
   const appSupport = oldest.appSupport
   const ownerSupport = oldest.ownerSupport as AnySupport
-  const ownGlobal = ownerSupport.context.global as SupportTagGlobal
-  const providers = global.providers
-  const owner = ownGlobal.oldest as Support
+  // const ownGlobal = ownerSupport.context.global as SupportTagGlobal
+  const providers = contextSubject.providers
+  const owner = ownerSupport.context.state.oldest as Support
 
   // connect child to owner
   reSupport.ownerSupport = owner
@@ -122,17 +108,16 @@ async function swapSupport(
 
   buildBeforeElement(
     reSupport,
-    {added:0, removed: 0},
     undefined,
     placeholder,
   )
 
-  recurseContext(global.contexts, reSupport)
+  recurseContext(contextSubject.contexts as SupportContextItem[], reSupport)
 
   paint()
 
-  reGlobal.newest = reSupport
-  reGlobal.oldest = reSupport
+  ;(contextSubject as SupportContextItem).state.newest = reSupport
+  ;(contextSubject as SupportContextItem).state.oldest = reSupport
 }
 
 function recurseContext(
@@ -177,9 +162,9 @@ function recurseContext(
     const nextGlobal = contextItem.global
 
     if(contextItem.global) {
-      const nextContext = nextGlobal?.contexts
+      const nextContext = contextItem.contexts
       if(nextContext) {
-        const nextSupport = nextGlobal.newest as AnySupport
+        const nextSupport = contextItem.state.newest as AnySupport
         recurseContext(nextContext, nextSupport)
       }
     }

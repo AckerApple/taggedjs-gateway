@@ -1,74 +1,81 @@
 import { tagGateway } from "taggedjs-gateway"
 import { GatewayTest } from "./GatewayTest.js"
 import { renderCountDiv } from "./renderCount.component.js"
-import { states, html, tag, state } from "taggedjs"
+import { button, div, hr, htmlTag, span, tag } from "taggedjs"
 
 export const gatewayDebug = tag(() => {
   let renderCount: number = 0
-  
-  states(get => [renderCount] = get(renderCount))
 
-  const gatewayData = state({
+  const gatewayData = {
     test: 22,
     testString: 'see foam',
-  })
+    label: 'gatewayData',
+  }
 
   ++renderCount
 
-  const gateway = tagGateway(GatewayTest)
+  const gateway = tagGateway(GatewayTest as any)
 
-  return html`
-    hello world
-    <!-- each prop as attr -->
-    <div id="simple-prop-test-wrap">
-      <div
-        tag=${gateway.id}
-        test:number=${gatewayData.test}
-        test2=${gatewayData.test}
-        string=${gatewayData.testString}
-      ></div>
-    </div>
+  return div(
+    'hello world',
+    
+    /* each prop as attr */
+    div({id:"simple-prop-test-wrap",
+      style:'border:1px solid purple'
+    },
+      _=> div({
+        tag: _ => gateway.id,
+        label: 'each-prop-as-attr',
+        test: _=> gatewayData.test,
+        test2: _=> gatewayData.test,
+        string: _=> gatewayData.testString,
+      })
+    ),
 
-    <hr />
+    hr,
 
-    <!-- props as one attr -->
-    <div id="props-test-wrap">
-      <div
-        tag=${gateway.id}
-        props=${gateway.props('props-as-one-attr', gatewayData)}
-      ></div>
-    </div>
+    /* props as one attr */
+    div({id:"props-test-wrap"},
+      div({
+        tag: _=> gateway.id,
+        props: _=> gateway.props('props-as-one-attr', gatewayData),
+      }),
+    ),
 
-    <hr />
+    hr,
 
-    <!-- web component -->
-    <div id="props-web-component-wrap">
-      <tag-element
-        tag=${gateway.id}
-        props=${gateway.props('inputMapsTagProps', gatewayData)}
-      ></tag-element>
-    </div>
+    /* web component */
+    div({id:"props-web-component-wrap"},
+      htmlTag('tag-element')({
+        tag: () => gateway.id,
+        props: ()=> gateway.props('inputMapsTagProps', gatewayData),
+      })
+    ),
 
-    <hr />
+    hr,
 
-    <!-- output events -->
-    ${/*
+    /* output events */
+    /*
     <div
       tag=${gateway.id}
       [attr.test]="gatewayData.test"
       events="formatChange"
       (formatChange)="formatChange.emit($event.detail.formatChange)"
     ></div>
-    */false}
+    */
 
-    <button id="increase-gateway-count"
-      onclick=${() => ++gatewayData.test}
-    >increase ${gatewayData.test}</button>
+    button({
+      id: "increase-gateway-count",
+      onClick: () => ++gatewayData.test,
+    }, _=> `increase ${gatewayData.test}`,),
     
-    <span id="display-gateway-count">${gatewayData.test}</span>
-    |
-    <span id="display-gateway-count-2">${gatewayData.test}</span>
+    span({
+      id:"display-gateway-count",
+      style: 'border:1px solid green',
+    }, _=> gatewayData.test),
+    '|',
+    span({id:"display-gateway-count-2"}, _=> gatewayData.test),
     
-    ${renderCountDiv({renderCount, name: 'gatewayDebug.component.ts'})}
-  `
+    _=> renderCountDiv({renderCount, name: 'gatewayDebug.component.ts'}),
+  )
 })

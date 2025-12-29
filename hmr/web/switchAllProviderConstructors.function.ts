@@ -22,7 +22,7 @@ export function switchAllProviderConstructors(
     return
   }
 
-  const providers = tagSupport.global.providers
+  const providers = tagSupport.context.providers
 
   if(providers) {
     providers.forEach((iPro: any) => {

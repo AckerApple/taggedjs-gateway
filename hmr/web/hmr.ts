@@ -1,7 +1,7 @@
 /** client code */
 
 // 🟠 Warning: avoid direct imports due to bundle workflow (old bundle and new bundle do not mix well)
-import { UseMemory, renderWithSupport, renderSupport, renderTagOnly, paint, TemplaterResult, Support, TaggedFunction, Wrapper, ValueTypes, TagAppElement, setUseMemory, Original } from "taggedjs"
+import { UseMemory, renderWithSupport, renderSupport, firstTagRender, reRenderTag, paint, TemplaterResult, Support, TaggedFunction, Wrapper, ValueTypes, TagAppElement, setUseMemory, Original } from "taggedjs"
 import { replaceTemplater } from "./replaceTemplater.function"
 
 /** @type {Support | undefined} */
@@ -10,7 +10,8 @@ let lastApp: Support
 reconnect()
 
 /**
- * @typedef {import("taggedjs").renderTagOnly} renderTagOnly
+ * @typedef {import("taggedjs").firstTagRender} firstTagRender
+ * @typedef {import("taggedjs").reRenderTag} reRenderTag
  * @typedef {import("taggedjs").TagComponent} TagComponent
  * @typedef {import("taggedjs").TagWrapper} TagWrapper
  * @typedef {import("taggedjs").Tag} Tag
@@ -21,10 +22,11 @@ reconnect()
  * @typedef {import("taggedjs").paint} paint
  */
 
-/** @typedef {{paint: paint, renderTagOnly: renderTagOnly, renderSupport: renderSupport, renderWithSupport: renderWithSupport}} HmrImport */
+/** @typedef {{paint: paint, reRenderTag: reRenderTag, firstTagRender: firstTagRender, renderSupport: renderSupport, renderWithSupport: renderWithSupport}} HmrImport */
 export type HmrImport = {
   paint: typeof paint
-  renderTagOnly: typeof renderTagOnly
+  firstTagRender: typeof firstTagRender
+  reRenderTag: typeof reRenderTag
   renderSupport: typeof renderSupport
   renderWithSupport: typeof renderWithSupport
 }

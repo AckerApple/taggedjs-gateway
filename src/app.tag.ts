@@ -1,4 +1,4 @@
-import { html, tag, states, onInit } from "taggedjs"
+import { tag, states, h1, div, button, legend, fieldset } from "taggedjs"
 import { runTests } from "./tests.js"
 import { renderCountDiv } from "./renderCount.component.js"
 import { gatewayDebug } from "./gatewayDebug.tag.js"
@@ -41,29 +41,30 @@ export const App = tag(() => {
 
   ++renderCount
 
-  onInit(() => {
-    console.log('app init should only run once')
-    
-    // runTesting(false)
-  })
+  console.info('app init should only run once')
 
-  const content = html`<!--app.js-->
-    <h1 id="h1-app">🌉 TaggedJs Gateway</h1>
+  const content = div(
+    h1({id:"h1-app"}, '🌉 TaggedJs Gateway'),
 
-    <button id="toggle-test" onclick=${toggle}>toggle test ${toggleValue}</button>
-    <button onclick=${runTesting}>run test</button>
+    button({id:"toggle-test", onClick: toggle},
+      _=> 'toggle test ${toggleValue}'
+    ),
+    button({onClick: _=> runTesting}, 'run test'),
 
-    ${renderCountDiv({name:'app', renderCount})}
+    _=> renderCountDiv({name:'app', renderCount}),
 
-    <div id="tagDebug-fx-wrap">
-      <fieldset id="content-debug" style="flex:2 2 20em">
-        <legend>#tagGateway</legend>
-        ${gatewayDebug()}
-      </fieldset>
-    </div>
+    div({id:"tagDebug-fx-wrap"},
+      fieldset({id:"content-debug", style:"flex:2 2 20em"},
+        legend('#tagGateway'),
+        gatewayDebug(),
+      )
+    ),
 
-    <button type="button" onclick=${() => runTesting(true)}>run testing</button>
-  `
+    button({
+      type:"button",
+      onClick: () => runTesting(true)
+    }, 'run testing')
+  )
 
   return content
 })
