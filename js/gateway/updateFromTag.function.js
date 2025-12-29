@@ -1,14 +1,16 @@
-import { renderSupport, setUseMemory } from "taggedjs";
+import { setUseMemory, paint } from "taggedjs";
 import { parseElmProps } from "./parseProps.js";
 export function updateFromTag(id, targetNode, tag) {
-    const latestTag = tag.context.global.newest;
+    const latestTag = tag.context.state.newest;
     const prevProps = latestTag.propsConfig?.latest;
     // const gateway = (targetNode as any).gateway
     const propMemory = parseElmProps(id, targetNode);
     const newProps = propMemory.props;
-    // 7-2025: always render updates (would need to clone props otherwise)
+    // Clone props before shallow checking to avoid mutation issues
     /*
-    const isSameProps = hasPropChanges(newProps, prevProps, PropWatches.SHALLOW)
+    const clonedNewProps = deepClone(newProps, 2)
+  
+    const isSameProps = hasPropChanges(clonedNewProps, prevProps, PropWatches.SHALLOW)
     if(isSameProps) {
       return // no reason to update, same props
     }
@@ -16,10 +18,18 @@ export function updateFromTag(id, targetNode, tag) {
     latestTag.templater.props = newProps;
     // after the next tag currently being rendered, then redraw me
     setUseMemory.tagClosed$.toCallback(() => {
-        const latestTag = tag.context.global.newest;
-        const anySupport = latestTag;
-        anySupport.templater.props = newProps;
-        renderSupport(anySupport);
+        const context = tag.context;
+        const latestTag = context.state.newest;
+        latestTag.templater.props = newProps;
+        const propsConfig = tag.propsConfig;
+        propsConfig.latest = newProps;
+        propsConfig.castProps = newProps;
+        tag.returnValue.props = newProps;
+        context.value.props = newProps;
+        tag.castedProps = newProps;
+        // renderSupport(anySupport)
+        tag.context.tagJsVar.processUpdate(context.value, context, tag, []);
+        paint();
     });
 }
 //# sourceMappingURL=updateFromTag.function.js.map

@@ -9,6 +9,7 @@ export class TagElement extends HTMLElement {
         super();
         this.gatewayPromise = this.gatewayPromise.then(() => {
             return new Promise((resolve) => {
+                // this.gateway = checkByElement(this)
                 setTimeout(() => {
                     this.gateway = checkByElement(this);
                     resolve();
