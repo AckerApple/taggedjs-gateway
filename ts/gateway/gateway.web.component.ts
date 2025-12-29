@@ -13,6 +13,7 @@ export class TagElement extends HTMLElement {
 
     this.gatewayPromise = this.gatewayPromise.then(() => {
       return new Promise<void>((resolve) => {
+        // this.gateway = checkByElement(this)
         setTimeout(() => {
           this.gateway = checkByElement(this)
           resolve()

@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### v1.2.0
+- Updated taggedjs to remove use of html``
+
 ### v1.0.0
 - <div [attr.tag]="tag.id" [attr.props]="tag.props({x:x,y:y})">
 - <div [attr.tag]="tag.id" [attr.x]="x" [attr.y]="y">
